@@ -27,13 +27,15 @@ function testGetToken() {
 function getToken(force) {
     force = force || false;
     var endPointURL = mmBuyerURL+"auth/GetToken"
+    var apiKey = "dfc5da790bf6416e811a4fd604909745";
+    var apiPassword = "e2e95754ddcf43b0bfe2e0d0ecc6ca2b";
     if ((mmToken != "") && (Date.now() < mmTokenExpiryDate) && !(force)) {
         return mmToken;
     }
     // Query Data
     var queryData = {
-        'APIKey': mmApiKey,
-        'APIPassword' : mmApiPassword
+        'APIKey': apiKey,
+        'APIPassword' : apiPassword
     };
     
     // Request Options
@@ -68,6 +70,18 @@ function getToken(force) {
 function testBoth() {
     testMMBuyerRequestTokenDetails();
     testMMBuyerRequestInventoryCounts();
+}
+
+function testMMBuyerGetAuthorisedAccounts() {
+    var endPoint = "partneraccounts/GetAuthorisedAccounts";
+    var queryData = {};
+    var response = mmBuyerRequest(endPoint, queryData);
+    Logger.log("Token: "+mmToken+"\n"+"Expiry Date: "+mmTokenExpiryDate);
+    Logger.log("End Point: "+endPoint+"\n"+"Query Data: ");
+    Logger.log(queryData);
+    Logger.log("--- RESPONSE ----\n");
+    Logger.log(response);
+  
 }
 
 function testMMBuyerRequestInventoryCounts() {

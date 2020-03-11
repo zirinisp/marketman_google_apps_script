@@ -1,128 +1,120 @@
-
 namespace Marketman {
-    export class AuthorisedAccounts {
-        constructor(
-            isSuccess: boolean,
-            errorMessage: string,
-            errorCode: string,
-            buyers: Buyer[],
-            vendors: any[],
-            chains: Chain[],
-            timestamp: Date = new Date()) {
+        /* INVENTORY COUNTS */
+
+        export class InventoryCountResponse {
+            inventoryCounts: InventoryCount[];
+            isSuccess: boolean;
+            errorMessage: string;
+            errorCode: string;
+
+            constructor(
+                inventoryCounts: InventoryCount[],
+                isSuccess: boolean,
+                errorMessage: string,
+                errorCode: string
+            ){
+                this.inventoryCounts = inventoryCounts;
                 this.isSuccess = isSuccess;
                 this.errorMessage = errorMessage;
                 this.errorCode = errorCode;
-                this.buyers = buyers;
-                this.vendors = vendors;
-                this.chains = chains;
-                this.timestamp = timestamp;
+            }
+            
+            static fromJSON(json: {[id: string] : any}): InventoryCountResponse {
+                return new InventoryCountResponse(
+                    InventoryCount.fromJSONArray(json.InventoryCounts),
+                    json.IsSuccess,
+                    json.ErrorMessage,
+                    json.ErrorCode
+                );
+            }
         }
+    
+        export class InventoryCount {
+            id: string;
+            buyerName: string;
+            buyerGuid: string;
+            countDateUTC: Date;
+            priceTotalWithoutVAT: number;
+            commments: string;
+            lines: InventoryLine[];
 
-        public static fromJSON(json: {[id: string] : any}): AuthorisedAccounts {
-            return new AuthorisedAccounts(
-                json.IsSuccess, 
-                json.ErrorMessage, 
-                json.ErrorCode, 
-                Buyer.fromJSONArray(json.Buyers), // TODO: Array
-                json.Vendors, // TODO: Array
-                Chain.fromJSONArray(json.Chains)
-            );
-        }
+            constructor(
+                id: string,
+                buyerName: string,
+                buyerGuid: string,
+                countDateUTC: Date,
+                priceTotalWithoutVAT: number,
+                commments: string,
+                lines: InventoryLine[]
+            ) {
+                this.id = id;
+                this.buyerName = buyerName;
+                this.buyerGuid = buyerGuid;
+                this.countDateUTC = countDateUTC;
+                this.priceTotalWithoutVAT = priceTotalWithoutVAT;
+                this.commments = commments;
+                this.lines = lines;
+            }
+    
+            static fromJSON(json: {[id: string] : any}): InventoryCount {
+                return new InventoryCount(
+                    json.ID,
+                    json.BuyerName,
+                    json.BuyerGuid,
+                    Marketman.convertStringToDate(json.CountDateUTC),
+                    json.PriceTotalWithoutVAT,
+                    json.Commments,
+                    InventoryLine.fromJSONArray(json.Lines)
+                );
+            }
 
-        isSuccess: boolean;
-        errorMessage: string;
-        errorCode: string;
-        buyers: Buyer[];
-        vendors: any[];
-        chains: Chain[];
-        timestamp: Date; // Date data were requested
-
-        public allBuyers(): Buyer[] {
-            // TODO: Merge chain buyers with buyers
-            var allBuyers: Buyer[] = [];
-
-            this.buyers.forEach((element: Buyer) => {
-                allBuyers.push(element);
-            });
-            this.chains.forEach((chain: Chain) => {
-                chain.buyers.forEach((element: Buyer) => {
-                    allBuyers.push(element);
+            public static fromJSONArray(jsonArray: []): InventoryCount[] {
+                var chains: InventoryCount[] = [];
+                jsonArray.forEach(json => {
+                    chains.push(InventoryCount.fromJSON(json));
                 });
-            });
-            return allBuyers;
+                return chains;
+            }
         }
+    
+        export class InventoryLine {
+            lineID: string;
+            itemID: string;
+            itemName: string;
+            totalCount: number;
+            totalValue: number;
+    
+            constructor(
+                lineID: string,
+                itemID: string,
+                itemName: string,
+                totalCount: number,
+                totalValue: number
+            ) {
+                this.lineID = lineID;
+                this.itemID = itemID;
+                this.itemName = itemName;
+                this.totalCount = totalCount;
+                this.totalValue = totalValue;
+            }
 
-        public buyersContaining(name: string): Buyer[] {
-            var buyers: Buyer[] = [];
-            this.allBuyers().forEach((buyer: Buyer) => {
-                if (buyer.name.includes(name)) {
-                    buyers.push(buyer);
-                }
-            })
-            return buyers;
+            static fromJSON(json: {[id: string] : any}): InventoryLine {
+                return new InventoryLine(
+                    json.LineID,
+                    json.ItemID,
+                    json.ItemName,
+                    json.TotalCount,
+                    json.TotalValue
+                );
+            }
+
+            public static fromJSONArray(jsonArray: []): InventoryLine[] {
+                var lines: InventoryLine[] = [];
+                jsonArray.forEach(json => {
+                    lines.push(InventoryLine.fromJSON(json));
+                });
+                return lines;
+            }
         }
-    }
-
-    export class Chain {
-        chainName: string;
-        guid: string;
-        buyers: Buyer[];
-
-        constructor(
-            chainName: string,
-            guid: string,
-            buyers: Buyer[]    
-        ) {
-            this.chainName = chainName;
-            this.guid = guid;
-            this.buyers = buyers;
-        }
-
-        public static fromJSON(json: {[id: string] : any}): Chain {
-            return new Chain(
-                json.ChainName, 
-                json.Guid, 
-                Buyer.fromJSONArray(json.Buyers)
-            );
-        }
-
-        public static fromJSONArray(jsonArray: []): Chain[] {
-            var chains: Chain[] = [];
-            jsonArray.forEach(json => {
-                chains.push(Chain.fromJSON(json));
-            });
-            return chains;
-        }
-
-    }
-
-    export class Buyer {
-        name: string;
-        guid: string;
-
-        constructor(
-            name: string,
-            guid: string,
-        ) {
-            this.name = name;
-            this.guid = guid;
-        }
-
-        public static fromJSON(json: {[id: string] : any}): Buyer {
-            return new Buyer(
-                json.BuyerName, 
-                json.Guid
-            );
-        }
-
-        public static fromJSONArray(jsonArray: []): Buyer[] {
-
-            var chains: Buyer[] = [];
-            jsonArray.forEach(json => {
-                var buyer = Buyer.fromJSON(json);
-                chains.push(buyer);
-            });
-            return chains;
-        }
-    }
+    
 }

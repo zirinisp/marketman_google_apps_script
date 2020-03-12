@@ -30,6 +30,7 @@ namespace Marketman {
 
             inventoryCountsArray(): [{[id: string] : any}] {
                 var data: [{[id: string] : any}] = [{}];
+                data.pop();
                 this.inventoryCounts.forEach(inventoryCount => {
                     data.push(...inventoryCount.toFlatArray());
                 });
@@ -87,6 +88,7 @@ namespace Marketman {
             public toFlatArray(): {[id: string] : any}[] {
 
                 var data: {[id: string] : any}[] = [{}];
+                data.pop();
                 this.lines.forEach(line => {
                     var inventoryCountData = {
                         "id": this.id,

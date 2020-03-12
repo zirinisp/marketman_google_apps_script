@@ -76,12 +76,12 @@ namespace Marketman {
             Logger.log(headers);
             Logger.log(values);
 
-            var sheetData = new SheetHeadedData("ASTest", new SSHeadedRange(1,1,100,100,1,2));
+            var sheetData = new SheetHeadedData("ASTest", new SSHeadedRange(0,0,0,0,0,0));
 
             sheetData.headers = headers;
             sheetData.values = values;
             sheetData.writeHeaders();
-//            sheetData.writeValues();
+            sheetData.writeValues();
 
         }
 

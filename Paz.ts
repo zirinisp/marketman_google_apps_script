@@ -166,6 +166,7 @@ class SheetHeadedData {
 
     writeHeaders() {
         // Write the headers
+        this.prepareWrite();
         var headerArray = [this.headers];
         this.writeHeaderRange().setValues(headerArray);
     }

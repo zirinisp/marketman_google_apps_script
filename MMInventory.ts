@@ -27,6 +27,14 @@ namespace Marketman {
                     json.ErrorCode
                 );
             }
+
+            inventoryCountsArray(): [{[id: string] : any}] {
+                var data: [{[id: string] : any}] = [{}];
+                this.inventoryCounts.forEach(inventoryCount => {
+                    data.push(...inventoryCount.toFlatArray());
+                });
+                return data;
+            }
         }
     
         export class InventoryCount {
@@ -75,6 +83,42 @@ namespace Marketman {
                 });
                 return chains;
             }
+
+            public toFlatArray(): {[id: string] : any}[] {
+
+                var data: {[id: string] : any}[] = [{}];
+                this.lines.forEach(line => {
+                    var inventoryCountData = {
+                        "id": this.id,
+                        "buyerName": this.buyerName,
+                        "buyerGuid": this.buyerGuid,
+                        "countDateUTC": this.countDateUTC,
+                        "priceTotalWithoutVAT": this.priceTotalWithoutVAT,
+                        "commments": this.commments
+                    }    
+                    for (let key in line.toFlatDictionary()) {
+                        let value = line[key];
+                        inventoryCountData["item."+key] = value;
+                    }
+                    data.push(inventoryCountData);
+                });
+                return data;
+            }
+
+            public static headers(): string[] {
+                var headers = [
+                    "id",
+                    "buyerName",
+                    "buyerGuid",
+                    "countDateUTC",
+                    "priceTotalWithoutVAT",
+                    "commments"
+                ];
+                InventoryLine.headers().forEach(header => {
+                    headers.push("item."+header);
+                });
+                return headers;
+            }
         }
     
         export class InventoryLine {
@@ -96,6 +140,29 @@ namespace Marketman {
                 this.itemName = itemName;
                 this.totalCount = totalCount;
                 this.totalValue = totalValue;
+            }
+
+            public toFlatDictionary(): {[id: string] : any} {
+
+                var data = {
+                    "lineID": this.lineID,
+                    "itemID": this.itemID,
+                    "itemName": this.itemName,
+                    "totalCount": this.totalCount,
+                    "totalValue": this.totalValue,
+                }
+                return data;
+            }
+
+            public static headers(): string[] {
+                var headers = [
+                    "lineID",
+                    "itemID",
+                    "itemName",
+                    "totalCount",
+                    "totalValue"
+                ];
+                return headers;
             }
 
             static fromJSON(json: {[id: string] : any}): InventoryLine {

@@ -53,12 +53,38 @@ namespace Marketman {
             Logger.log("End Point: Inventory Counts");
             Logger.log("--- RESPONSE ----\n");
             Logger.log(inventoryResponse.inventoryCounts.length);
-            Logger.log(inventoryResponse);
+            Logger.log(JSON.stringify(inventoryResponse));
+
+
+            Logger.log("--- RESPONSE ARRAY----\n");
+
+            Logger.log(JSON.stringify(inventoryResponse.inventoryCountsArray()));
 
             //Logger.log(JSON.stringify(response));
+        }
 
+        inventoryCountsWrite() {
+            var fromDate = new Date(new Date().setDate(new Date().getDate() - 2));
+            var toDate = new Date();
+            var getLineDetails = true;
+
+            var inventoryResponse = this.buyerApi.getInventoryCounts(fromDate, toDate, getLineDetails, this.testBuyer());
+
+            var values = inventoryResponse.inventoryCountsArray();
+            var headers = Marketman.InventoryCount.headers();
+
+            Logger.log(headers);
+            Logger.log(values);
+
+            var sheetData = new SheetHeadedData("ASTest", new SSHeadedRange(1,1,100,100,1,2));
+
+            sheetData.headers = headers;
+            sheetData.values = values;
+            sheetData.writeHeaders();
+//            sheetData.writeValues();
 
         }
+
 
         requestTokenDetails() {
             var response = this.buyerApi.getTokenDetails();
@@ -83,4 +109,9 @@ function testToken() {
 function testInventory() {
     var test = new Marketman.Test();
     test.inventoryCounts();
+}
+
+function testInventoryWrite() {
+    var test = new Marketman.Test();
+    test.inventoryCountsWrite();
 }

@@ -107,6 +107,25 @@ namespace Marketman {
 
         }
 
+        inventoryItems() {
+
+            var response = this.buyerApi.getInventoryItems(this.testBuyer(), false, null);
+
+            var values = response.itemsArray();
+            var headers = Marketman.InventoryItem.headers();
+
+            Logger.log(headers);
+            Logger.log(values);
+
+            var sheetData = new SheetHeadedData("ASTest", new SSHeadedRange(0,0,0,0,0,0));
+
+            sheetData.headers = headers;
+            sheetData.values = values;
+            sheetData.writeHeaders();
+            sheetData.writeValues();
+
+        }
+
         requestTokenDetails() {
             var response = this.buyerApi.getTokenDetails();
             Logger.log("Token: " + this.buyerApi.getToken());
@@ -140,6 +159,11 @@ function testInventoryWrite() {
 function testActiualVsTheoritical() {
     var test = new Marketman.Test();
     test.actualVsTheoritical();
+}
+
+function testInventoryItems() {
+    var test = new Marketman.Test();
+    test.inventoryItems();
 }
 
 function testDates() {

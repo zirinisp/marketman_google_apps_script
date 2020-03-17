@@ -46,7 +46,7 @@ namespace Marketman {
         GetTokenDetails = "auth/GetTokenDetails",
         GetInventoryCounts = "inventory/GetInventoryCounts",
         GetActualVsTheoretical = "inventory/GetActualVsTheoretical",
-
+        GetInventoryItems = "inventory/GetInventoryItems",
     }
 
 
@@ -271,6 +271,21 @@ namespace Marketman {
             var response = this.buyerRequestDictionary(endPoint, queryData);
             var avtResponse = Marketman.ActualVsTheoritical.fromJSON(response);
             return avtResponse;
+        }
+        
+        getInventoryItems(buyer: Buyer = this.defaultBuyer(), getDeleted: boolean = false, itemIDs: string[] = null): InventoryItemsResponse {
+            var endPoint = EndPoint.GetInventoryItems;
+            var queryData = {
+                'GetDeleted': getDeleted,
+                'BuyerGUID': buyer.guid
+            };
+            if (itemIDs != null) {
+                queryData['ItemIDs'] = itemIDs;
+            }
+            Logger.log(queryData);
+            var response = this.buyerRequestDictionary(endPoint, queryData);
+            var iiResponse = Marketman.InventoryItemsResponse.fromJSON(response);
+            return iiResponse;
         }
     }
 }

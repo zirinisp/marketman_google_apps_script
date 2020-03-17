@@ -45,12 +45,22 @@ namespace Marketman {
         GetAuthorisedAccounts = "partneraccounts/GetAuthorisedAccounts",
         GetTokenDetails = "auth/GetTokenDetails",
         GetInventoryCounts = "inventory/GetInventoryCounts",
+        GetActualVsTheoretical = "inventory/GetActualVsTheoretical",
 
     }
 
 
+    export enum InventoryTime {
+        StartOfDay,
+        EndOfDay
+    }
+
+
     export function convertDateToString(date: Date) {
-        let formatted_date = date.getFullYear() + "/" + appendLeadingZeroes(date.getMonth() + 1) + "/" + appendLeadingZeroes(date.getDate()) + " " + appendLeadingZeroes(date.getHours()) + ":" + appendLeadingZeroes(date.getMinutes()) + ":" + appendLeadingZeroes(date.getSeconds());
+        var timezone = SpreadsheetApp.getActive().getSpreadsheetTimeZone();
+        
+        let formatted_date = Utilities.formatDate(date, timezone.toString(), 'yyyy/MM/dd HH:mm:ss')
+        //let formatted_date = date.getFullYear() + "/" + appendLeadingZeroes(date.getMonth() + 1) + "/" + appendLeadingZeroes(date.getDate()) + " " + appendLeadingZeroes(date.getHours()) + ":" + appendLeadingZeroes(date.getMinutes()) + ":" + appendLeadingZeroes(date.getSeconds());
         return formatted_date;
     };
 
@@ -59,6 +69,35 @@ namespace Marketman {
         var date = new Date(mmDateString);
         return date;
     }
+
+    export function convertInventoryDateToString(date: Date, time: InventoryTime) {
+        var timezone = SpreadsheetApp.getActive().getSpreadsheetTimeZone();
+        
+        let formatted_date = Utilities.formatDate(date, timezone.toString(), 'yyyy/MM/dd')
+        if (time == InventoryTime.StartOfDay) {
+            formatted_date += " 00:00:00";
+        } else {
+            formatted_date += " 23:59:59";
+        }
+        return formatted_date;
+    };
+/* Does not work as it messes with the timezones -> convertStartEndDateToString
+    export function changeToDayStart(date: Date) {
+        // Acual VS Theoritical Marketman Dates must contain valid count date. Day start is 00:00:00, day end is 23:59:59
+
+        date.setUTCHours(0);
+        date.setUTCMinutes(0);
+        date.setUTCSeconds(0);
+    };
+
+    export function changeToDayEnd(date: Date) {
+        // Acual VS Theoritical Marketman Dates must contain valid count date. Day start is 00:00:00, day end is 23:59:59
+
+        date.setUTCHours(23);
+        date.setUTCMinutes(59);
+        date.setUTCSeconds(59);
+    };
+*/
 
     export class BuyerApi {
 
@@ -213,9 +252,25 @@ namespace Marketman {
                 'BuyerGUID': buyer.guid,
                 'GetLineDetails': getLineDetails
             };
+            Logger.log(queryData);
             var response = this.buyerRequestDictionary(endPoint, queryData);
             var inventoryResponse = Marketman.InventoryCountResponse.fromJSON(response);
             return inventoryResponse;
+        }
+
+        getActualVsTheoritical(startDate: Date, startTime: InventoryTime, endDate: Date = new Date(), endTime: InventoryTime, buyer: Buyer = this.defaultBuyer()): ActualVsTheoritical {
+            var endPoint = EndPoint.GetActualVsTheoretical;
+            var startDateString = convertInventoryDateToString(startDate, startTime);
+            var endDateString = convertInventoryDateToString(endDate, endTime);
+            var queryData = {
+                'StartDateUTC': startDateString,
+                'EndDateUTC': endDateString,
+                'BuyerGUID': buyer.guid
+            };
+            Logger.log(queryData);
+            var response = this.buyerRequestDictionary(endPoint, queryData);
+            var avtResponse = Marketman.ActualVsTheoritical.fromJSON(response);
+            return avtResponse;
         }
     }
 }

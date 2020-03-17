@@ -23,8 +23,8 @@ namespace Marketman {
                 json.IsSuccess, 
                 json.ErrorMessage, 
                 json.ErrorCode, 
-                Buyer.fromJSONArray(json.Buyers), // TODO: Array
-                json.Vendors, // TODO: Array
+                Buyer.fromJSONArray(json.Buyers),
+                json.Vendors,
                 Chain.fromJSONArray(json.Chains)
             );
         }

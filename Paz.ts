@@ -67,9 +67,8 @@ class SheetHeadedData {
         }
     }
 
-    getValues() {
+    getHeaders() {
         this.prepareRead();
-
         var headerValues = this.headerRange().getValues()[0];
         var headers: Array<string> = [];
         for (var i = 0; i < headerValues.length; i++) {
@@ -80,6 +79,11 @@ class SheetHeadedData {
             headers[i] = header;
         }
         this.headers = headers;
+    }
+
+    getValues() {
+        this.prepareRead();
+        this.getHeaders();
 
         var dataValues = this.dataRange().getValues();
         var values: [{ [index: string]: any }] = [{}];
@@ -89,7 +93,7 @@ class SheetHeadedData {
         dataValues.forEach(row => {
             values[i] = {};
             for (var columnNum = 0; columnNum < this.range.numColumns; columnNum++) {
-                var header: string = headers[columnNum];
+                var header: string = this.headers[columnNum];
                 values[i][header] = row[columnNum];
             }
             i++;
@@ -170,13 +174,21 @@ class SheetHeadedData {
         var headerArray = [this.headers];
         this.writeHeaderRange().setValues(headerArray);
     }
-    clearRange() {
+    clearValues() {
+        // TODO: Implement
+        //this.writeDataRange().clearContent(); Does not work
 
     }
-
-    writeValues() {
+    /**
+     * @param  {Boolean=false} writeHeaders - false will use the current headers. true will create new or overwrite them
+     */
+    writeValues(writeHeaders: Boolean = false) {
         this.prepareWrite();
-        this.writeHeaders();
+        if (writeHeaders) {
+            this.writeHeaders();
+        } else {
+            this.getHeaders();
+        }
         // Write Data
 
         var data = [];

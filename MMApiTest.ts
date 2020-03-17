@@ -82,9 +82,30 @@ namespace Marketman {
             sheetData.values = values;
             sheetData.writeHeaders();
             sheetData.writeValues();
-
         }
 
+        actualVsTheoritical() {
+            var startDate = new Date();
+            startDate.setUTCFullYear(2020, 1, 13);
+            var endDate = new Date();
+            endDate.setUTCFullYear(2020,1,20);
+
+            var response = this.buyerApi.getActualVsTheoritical(startDate, Marketman.InventoryTime.EndOfDay, endDate, Marketman.InventoryTime.EndOfDay, this.testBuyer());
+
+            var values = response.toFlatArray();
+            var headers = Marketman.AVTItem.headers();
+
+            Logger.log(headers);
+            Logger.log(values);
+
+            var sheetData = new SheetHeadedData("ASTest", new SSHeadedRange(0,0,0,0,0,0));
+
+            sheetData.headers = headers;
+            sheetData.values = values;
+            sheetData.writeHeaders();
+            sheetData.writeValues();
+
+        }
 
         requestTokenDetails() {
             var response = this.buyerApi.getTokenDetails();
@@ -114,4 +135,33 @@ function testInventory() {
 function testInventoryWrite() {
     var test = new Marketman.Test();
     test.inventoryCountsWrite();
+}
+
+function testActiualVsTheoritical() {
+    var test = new Marketman.Test();
+    test.actualVsTheoritical();
+}
+
+function testDates() {
+    // Get the variables needed
+    var sheet = SpreadsheetApp.getActiveSheet();
+    var fromDate = sheet.getRange('C2').getValue();
+    var fromDateStart = (sheet.getRange('D2').getValue() == "Start");
+    var toDate = sheet.getRange('F2').getValue();
+    var toDateStart = (sheet.getRange('G2').getValue() == "Start");
+    var buyerContains = sheet.getRange('I2').getValue();
+    var fromTime =  Marketman.InventoryTime.EndOfDay;
+    if (fromDateStart) {
+        fromTime = Marketman.InventoryTime.StartOfDay;
+    }
+    var toTime =  Marketman.InventoryTime.EndOfDay;
+    if (toDateStart) {
+        toTime = Marketman.InventoryTime.StartOfDay;
+    }
+    var fromDateString = Marketman.convertInventoryDateToString(fromDate, fromTime);
+    var toDateString = Marketman.convertInventoryDateToString(toDate, toTime);
+
+    Logger.log(fromDateString);
+    Logger.log(toDateString);
+
 }

@@ -101,23 +101,3 @@ function getInventoryItemsButton() {
     sheetData.clearValues();
     sheetData.writeValues(false);
 }
-
-function getMovementSingleProduct() {
-    var buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
-
-    // Get the variables needed
-    var sheet = SpreadsheetApp.getActiveSheet();
-    var dateRanges = sheet.getRange('A6:B').getValues();
-
-    /*
-    var buyer  = buyerApi.buyersContaining(buyerContains)[0];
-
-    // TODO: Type Check
-    // TODO: check if buyer exists
-    var response = buyerApi.getInventoryItems(buyer, getDeleted, itemIDs);
-
-    var values = response.itemsArray();
-    var headers = Marketman.PurchaseItem.headers();
-*/
-
-}

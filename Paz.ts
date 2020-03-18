@@ -231,3 +231,16 @@ class SSHeadedRange extends SSRange {
     headerRow: number;
     firstDataRow: number;
 }
+
+interface String {
+    equals(compare: string): boolean;
+  }
+  
+  String.prototype.equals = function (compare: string) : boolean {
+    var s: string = String(this);
+
+    if (s.match(compare) !== null) {
+        return true;
+    }
+    return false;
+  }

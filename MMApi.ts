@@ -79,12 +79,52 @@ namespace Marketman {
             this.password = password;
         }
 
+        getStoredToken(): Token {
+            var dataString = PropertiesService.getDocumentProperties().getProperty("MMToken");
+            if (!dataString) {
+                return null;
+            }
+            var data = JSON.parse(dataString);
+            Logger.log("Found Stored Token: "+data);
+            var tokenString: string = data["token"];
+            Logger.log(data["expiryDate"]);
+            var expiryDate = new Date();
+            expiryDate.setTime(data["expiryDate"]);
+
+            var error: string = data["error"];
+            if (!tokenString || !expiryDate) {
+                Logger.log("Token Could not be used "+expiryDate);
+                return null;
+            }
+            var token = new Token(tokenString, expiryDate, error);
+            Logger.log("Retrieved Token "+token);
+            return token;
+        }
+
+        storeToken() {
+            var data: { [id: string]: any } = {
+                "token" : this.token.token,
+                "expiryDate" :this.token.expiryDate.getTime(),
+                "error" : this.token.error
+            };
+            var jsonString = JSON.stringify(data);
+            Logger.log("Storing New Token");
+            Logger.log(data+" => "+jsonString);
+            PropertiesService.getDocumentProperties().setProperty("MMToken", jsonString);
+        }
+
         // Get a token to make requests. If there is an active token, it is returned and no request is made.
         getToken(force?: boolean): Token {
             if (force != true) {
                 if (this.token.active()) {
                     return this.token;
                 }
+            }
+
+            var storedToken = this.getStoredToken();
+            if (storedToken && storedToken.active()) {
+                this.token = storedToken;
+                return storedToken;
             }
 
             var endPointURL = this.buyerURL + EndPoint.GetToken;
@@ -120,6 +160,7 @@ namespace Marketman {
                 var error = responseDictionary.ErrorMessage || "";
                 token = new Token(tokenString, expiryDate, error);
                 this.token = token;
+                this.storeToken();
             }
             return this.token;
         }
@@ -236,6 +277,7 @@ namespace Marketman {
             };
             Logger.log(queryData);
             var response = this.buyerRequestDictionary(endPoint, queryData);
+            Logger.log(startDate+" => "+startDate.dateValue());
             var avtResponse = Marketman.ActualVsTheoritical.fromJSON(response, startDate.dateValue(), endDate.dateValue(), buyer.guid);
             return avtResponse;
         }

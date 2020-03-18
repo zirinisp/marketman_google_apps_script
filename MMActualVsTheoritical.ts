@@ -65,7 +65,6 @@ namespace Marketman {
                     return;
                 }
             });
-            Logger.log(searchItem);
         return searchItem;
         }
 

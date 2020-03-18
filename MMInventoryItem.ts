@@ -5,26 +5,30 @@ namespace Marketman {
         errorMessage: string;
         errorCode: string;
         items: InventoryItem[];
+        requestDate: Date;
 
 
         constructor(
             isSuccess: boolean,
             errorMessage: string,
             errorCode: string,
-            items: InventoryItem[]
+            items: InventoryItem[],
+            requestDate: Date
         ) {
             this.isSuccess = isSuccess;
             this.errorMessage = errorMessage;
             this.errorCode = errorCode;
             this.items = items;
+            this.requestDate = requestDate;
         }
 
-        static fromJSON(json: { [id: string]: any }): InventoryItemsResponse {
+        static fromJSON(json: { [id: string]: any }, requestDate: Date): InventoryItemsResponse {
             return new InventoryItemsResponse(
                 json.IsSuccess,
                 json.ErrorMessage,
                 json.ErrorCode,
-                InventoryItem.fromJSONArray(json.Items)
+                InventoryItem.fromJSONArray(json.Items, requestDate),
+                requestDate
             );
         }
 
@@ -56,6 +60,7 @@ namespace Marketman {
         debitAccountName: null | string;
         purchaseItems: PurchaseItem[];
         isDeleted: boolean;
+        requestDate: Date;
 
         constructor(
             id: string,
@@ -73,6 +78,7 @@ namespace Marketman {
             debitAccountName: string,
             purchaseItems: PurchaseItem[],
             isDeleted: boolean,
+            requestDate: Date
         ) {
             this.id = id;
             this.name = name;
@@ -89,9 +95,10 @@ namespace Marketman {
             this.debitAccountName = debitAccountName;
             this.purchaseItems = purchaseItems;
             this.isDeleted = isDeleted;
+            this.requestDate = requestDate
         }
 
-        public static fromJSON(json: { [id: string]: any }): InventoryItem {
+        public static fromJSON(json: { [id: string]: any }, requestDate: Date): InventoryItem {
             return new InventoryItem(
                 json.ID,
                 json.Name,
@@ -108,14 +115,14 @@ namespace Marketman {
                 json.DebitAccountName,
                 PurchaseItem.fromJSONArray(json.PurchaseItems),
                 json.IsDeleted,
-
+                requestDate
             )
         }
 
-        public static fromJSONArray(jsonArray: []): InventoryItem[] {
+        public static fromJSONArray(jsonArray: [], requestDate: Date): InventoryItem[] {
             var items: InventoryItem[] = [];
             jsonArray.forEach(json => {
-                items.push(InventoryItem.fromJSON(json));
+                items.push(InventoryItem.fromJSON(json, requestDate));
             });
             return items;
         }
@@ -139,7 +146,8 @@ namespace Marketman {
                     "onHand" : this.onHand,
                     "bomPrice" : this.bomPrice,
                     "debitAccountName" : this.debitAccountName,
-                    "isDeleted" : this.isDeleted
+                    "isDeleted" : this.isDeleted,
+                    "requestDate" : this.requestDate
                 }    
                 for (let key in item.toFlatDictionary()) {
                     let value = item[key];
@@ -165,7 +173,8 @@ namespace Marketman {
                 "onHand",
                 "bomPrice",
                 "debitAccountName",
-                "isDeleted"
+                "isDeleted",
+                "requestDate"
             ];
             PurchaseItem.headers().forEach(header => {
                 headers.push("purchaseItem."+header);

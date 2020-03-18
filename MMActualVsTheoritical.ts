@@ -5,25 +5,37 @@ namespace Marketman {
         errorMessage: string;
         errorCode: string;
         items: AVTItem[];
+        startDate: Date;
+        endDate: Date;
+        buyerGUID: string;
 
         constructor(
             isSuccess: boolean,
             errorMessage: string,
             errorCode: string,
-            items: AVTItem[]
-        ) {
+            items: AVTItem[],
+            startDate: Date,
+            endDate: Date,
+            buyerGUID: string
+            ) {
             this.items = items
             this.isSuccess = isSuccess;
             this.errorMessage = errorMessage;
             this.errorCode = errorCode;
+            this.startDate = startDate;
+            this.endDate = endDate;
+            this.buyerGUID = buyerGUID;
         }
 
-        public static fromJSON(json: { [id: string]: any }): ActualVsTheoritical {
+        public static fromJSON(json: { [id: string]: any }, startDate: Date, endDate: Date, buyerGUID: string): ActualVsTheoritical {
             return new ActualVsTheoritical(
                 json.IsSuccess,
                 json.ErrorMessage,
                 json.ErrorCode,
-                AVTItem.fromJSONArray(json.Items)
+                AVTItem.fromJSONArray(json.Items, startDate, endDate),
+                startDate,
+                endDate,
+                buyerGUID
             );
         }
         public toFlatArray(): [{[id: string] : any}] {
@@ -59,6 +71,9 @@ namespace Marketman {
         difference: number;
         differenceValue: number;
         differencePercentage: number;
+        startDate: Date;
+        endDate: Date;
+
 
         constructor(
             id: string,
@@ -81,7 +96,9 @@ namespace Marketman {
             expected: number,
             difference: number,
             differenceValue: number,
-            differencePercentage: number
+            differencePercentage: number,
+            startDate: Date,
+            endDate: Date
         ) {
             this.id = id;
             this.itemID = itemID;
@@ -104,9 +121,11 @@ namespace Marketman {
             this.difference = difference;
             this.differenceValue = differenceValue;
             this.differencePercentage = differencePercentage;
+            this.startDate = startDate;
+            this.endDate = endDate;
         }
 
-        public static fromJSON(json: { [id: string]: any }): AVTItem {
+        public static fromJSON(json: { [id: string]: any }, startDate: Date, endDate: Date): AVTItem {
             return new AVTItem(
                 json.ID,
                 json.ItemID,
@@ -128,15 +147,17 @@ namespace Marketman {
                 json.Expected,
                 json.Difference,
                 json.DifferenceValue,
-                json.DifferencePercentage
+                json.DifferencePercentage,
+                startDate,
+                endDate
             );
         }
 
 
-        public static fromJSONArray(jsonArray: []): AVTItem[] {
+        public static fromJSONArray(jsonArray: [], startDate: Date, endDate: Date): AVTItem[] {
             var items: AVTItem[] = [];
             jsonArray.forEach(json => {
-                items.push(AVTItem.fromJSON(json));
+                items.push(AVTItem.fromJSON(json, startDate, endDate));
             });
             return items;
         }
@@ -164,7 +185,9 @@ namespace Marketman {
                 "expected": this.expected,
                 "difference": this.difference,
                 "differenceValue": this.differenceValue,
-                "differencePercentage": this.differencePercentage
+                "differencePercentage": this.differencePercentage,
+                "startDate": this.startDate,
+                "endDate" : this.endDate
             }
             return data;
         }

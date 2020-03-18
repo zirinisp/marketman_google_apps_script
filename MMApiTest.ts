@@ -87,10 +87,12 @@ namespace Marketman {
         actualVsTheoritical() {
             var startDate = new Date();
             startDate.setUTCFullYear(2020, 1, 13);
+            var mmStartDate = new InventoryDate(startDate, InventoryTime.EndOfDay);
             var endDate = new Date();
             endDate.setUTCFullYear(2020,1,20);
+            var mmEndDate = new InventoryDate(endDate, InventoryTime.EndOfDay);
 
-            var response = this.buyerApi.getActualVsTheoritical(startDate, Marketman.InventoryTime.EndOfDay, endDate, Marketman.InventoryTime.EndOfDay, this.testBuyer());
+            var response = this.buyerApi.getActualVsTheoritical(mmStartDate, mmEndDate, this.testBuyer());
 
             var values = response.toFlatArray();
             var headers = Marketman.AVTItem.headers();
@@ -182,10 +184,10 @@ function testDates() {
     if (toDateStart) {
         toTime = Marketman.InventoryTime.StartOfDay;
     }
-    var fromDateString = Marketman.convertInventoryDateToString(fromDate, fromTime);
-    var toDateString = Marketman.convertInventoryDateToString(toDate, toTime);
-
-    Logger.log(fromDateString);
-    Logger.log(toDateString);
+    var mmFromDate = new Marketman.InventoryDate(fromDate, fromTime);
+    var mmToDate = new Marketman.InventoryDate(toDate, toTime);
+    
+    Logger.log(mmFromDate.stringValue());
+    Logger.log(mmToDate.stringValue());
 
 }

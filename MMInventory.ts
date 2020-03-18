@@ -1,30 +1,91 @@
 namespace Marketman {
         /* INVENTORY COUNTS */
 
+        export enum InventoryTime {
+            StartOfDay,
+            EndOfDay
+        }
+    
+        export class InventoryDate {
+            date: Date;
+            time: InventoryTime;
+
+            constructor(date: Date, time: InventoryTime) {
+                this.date = date;
+                this.time = time;
+            }
+
+            stringValue(timezone: string = 'Etc/GMT') {
+                let formatted_date = Utilities.formatDate(this.date, timezone.toString(), 'yyyy/MM/dd')
+                if (this.time == InventoryTime.StartOfDay) {
+                    formatted_date += " 00:00:00";
+                } else {
+                    formatted_date += " 23:59:59";
+                }
+                return formatted_date;        
+            }
+
+            dateValue() {
+                var stringValue = this.stringValue().replace(" ", "T")+"+00:00";
+                var date = new Date(Date.parse(stringValue));
+                return date;
+            }
+
+            public static fromDate(date: Date) : InventoryDate {
+                if (date.getUTCHours() >= 12) {
+                    return new InventoryDate(date, InventoryTime.EndOfDay);
+                } else {
+                    return new InventoryDate(date, InventoryTime.StartOfDay);
+                }
+            }
+        }
+
         export class InventoryCountResponse {
             inventoryCounts: InventoryCount[];
             isSuccess: boolean;
             errorMessage: string;
             errorCode: string;
+            fromDate: Date; 
+            toDate: Date;
+            getLineDetails: Boolean; 
+            buyerGUID: string;
 
             constructor(
                 inventoryCounts: InventoryCount[],
                 isSuccess: boolean,
                 errorMessage: string,
-                errorCode: string
+                errorCode: string,
+                fromDate: Date,
+                toDate: Date,
+                getLineDetails: Boolean,
+                buyerGUID: string
             ){
                 this.inventoryCounts = inventoryCounts;
                 this.isSuccess = isSuccess;
                 this.errorMessage = errorMessage;
                 this.errorCode = errorCode;
+                this.fromDate = fromDate;
+                this.toDate = toDate;
+                this.getLineDetails = getLineDetails;
+                this.buyerGUID = buyerGUID;
             }
             
-            static fromJSON(json: {[id: string] : any}): InventoryCountResponse {
+            static fromJSON(
+                json: {[id: string] : any},
+                fromDate: Date,
+                toDate: Date,
+                getLineDetails: Boolean,
+                buyerGUID: string
+                ) : InventoryCountResponse {
                 return new InventoryCountResponse(
                     InventoryCount.fromJSONArray(json.InventoryCounts),
                     json.IsSuccess,
                     json.ErrorMessage,
-                    json.ErrorCode
+                    json.ErrorCode,
+                    fromDate,
+                    toDate,
+                    getLineDetails,
+                    buyerGUID
                 );
             }
 

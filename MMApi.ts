@@ -87,7 +87,6 @@ namespace Marketman {
             var data = JSON.parse(dataString);
             Logger.log("Found Stored Token: "+data);
             var tokenString: string = data["token"];
-            Logger.log(data["expiryDate"]);
             var expiryDate = new Date();
             expiryDate.setTime(data["expiryDate"]);
 

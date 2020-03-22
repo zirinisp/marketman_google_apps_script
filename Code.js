@@ -1,12 +1,12 @@
-function myFunction() {
-  
+function updateInventoryItemsAndCounts() {
+    var buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
+    getInventory("Inventory Items", buyerApi);
+    getInventoryCounts("Inventory Counts", buyerApi);
 }
 
-function getInventoryButton() {
-    var buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
+function getInventory(sheetName, buyerApi) {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
 
-    // Get the variables needed
-    var sheet = SpreadsheetApp.getActiveSheet();
     var fromDate = sheet.getRange('C2').getValue();
     var toDate = sheet.getRange('E2').getValue();
     var getLineDetails = sheet.getRange('G2').getValue();
@@ -30,12 +30,16 @@ function getInventoryButton() {
     sheetData.writeValues(false);
 }
 
-
-function getActualVsTheoriticalButton() {
+function getInventoryButton() {
     var buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
 
     // Get the variables needed
-    var sheet = SpreadsheetApp.getActiveSheet();
+    var sheetName = SpreadsheetApp.getActiveSheet().sheetName;
+    getInventory(sheetName, buyerApi);
+}
+
+function getActualVsTheoritical(sheetName, buyerApi) {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
     var fromDate = sheet.getRange('C2').getValue();
     var fromDateStart = (sheet.getRange('D2').getValue() == "Start");
     var toDate = sheet.getRange('F2').getValue();
@@ -69,11 +73,17 @@ function getActualVsTheoriticalButton() {
     sheetData.writeValues(false);
 }
 
-function getInventoryItemsButton() {
+function getActualVsTheoriticalButton() {
     var buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
 
     // Get the variables needed
-    var sheet = SpreadsheetApp.getActiveSheet();
+    var sheetName = SpreadsheetApp.getActiveSheet().sheetName;
+    getActualVsTheoritical(sheetName, buyerApi);
+}
+
+function getInventoryItems(sheetName, buyerApi) {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+
     var getDeleted = sheet.getRange('C2').getValue();
     var itemIDsString = sheet.getRange('E2').getValue();
     var buyerContains = sheet.getRange('G2').getValue();
@@ -100,4 +110,12 @@ function getInventoryItemsButton() {
     sheetData.values = values;
     sheetData.clearValues();
     sheetData.writeValues(false);
+
+}
+function getInventoryItemsButton() {
+    var buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
+
+    // Get the variables needed
+    var sheetName = SpreadsheetApp.getActiveSheet().sheetName;
+    getInventoryItems(sheetName, buyerApi);
 }

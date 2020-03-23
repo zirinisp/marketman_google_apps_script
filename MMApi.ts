@@ -54,7 +54,7 @@ namespace Marketman {
 
     export function convertDateToString(date: Date) {
         var timezone = SpreadsheetApp.getActive().getSpreadsheetTimeZone();
-        
+
         let formatted_date = Utilities.formatDate(date, timezone.toString(), 'yyyy/MM/dd HH:mm:ss')
         //let formatted_date = date.getFullYear() + "/" + appendLeadingZeroes(date.getMonth() + 1) + "/" + appendLeadingZeroes(date.getDate()) + " " + appendLeadingZeroes(date.getHours()) + ":" + appendLeadingZeroes(date.getMinutes()) + ":" + appendLeadingZeroes(date.getSeconds());
         return formatted_date;
@@ -85,30 +85,30 @@ namespace Marketman {
                 return null;
             }
             var data = JSON.parse(dataString);
-            Logger.log("Found Stored Token: "+data);
+            Logger.log("Found Stored Token: " + data);
             var tokenString: string = data["token"];
             var expiryDate = new Date();
             expiryDate.setTime(data["expiryDate"]);
 
             var error: string = data["error"];
             if (!tokenString || !expiryDate) {
-                Logger.log("Token Could not be used "+expiryDate);
+                Logger.log("Token Could not be used " + expiryDate);
                 return null;
             }
             var token = new Token(tokenString, expiryDate, error);
-            Logger.log("Retrieved Token "+token);
+            Logger.log("Retrieved Token " + token);
             return token;
         }
 
         storeToken() {
             var data: { [id: string]: any } = {
-                "token" : this.token.token,
-                "expiryDate" :this.token.expiryDate.getTime(),
-                "error" : this.token.error
+                "token": this.token.token,
+                "expiryDate": this.token.expiryDate.getTime(),
+                "error": this.token.error
             };
             var jsonString = JSON.stringify(data);
             Logger.log("Storing New Token");
-            Logger.log(data+" => "+jsonString);
+            Logger.log(data + " => " + jsonString);
             PropertiesService.getDocumentProperties().setProperty("MMToken", jsonString);
         }
 
@@ -209,7 +209,7 @@ namespace Marketman {
             if (responseText) {
                 var responseDictionary = JSON.parse(responseText);
                 return responseDictionary;
-            }            
+            }
         }
 
         getAuthorisedAccounts(force?: boolean): AuthorisedAccounts {
@@ -219,7 +219,7 @@ namespace Marketman {
             }
 
             var response = this.buyerRequestDictionary(EndPoint.GetAuthorisedAccounts, {});
-            
+
             var authorizedAccounts = Marketman.AuthorisedAccounts.fromJSON(response);
 
             Logger.log("getAuthorizedAccounts");
@@ -232,6 +232,17 @@ namespace Marketman {
             return authorizedAccounts;
         }
 
+        firstBuyerContaining(name: string): Buyer {
+            if (this.defaultBuyer().name.includes(name)) {
+                return this.defaultBuyer();
+            }
+            var buyers = this.buyersContaining(name);
+            if (buyers.length > 0) {
+                return buyers[0];
+            }
+            return null;
+        }
+
         buyersContaining(name: string): Buyer[] {
             Logger.log(this.getAuthorisedAccounts().allBuyers());
             return this.getAuthorisedAccounts().buyersContaining(name);
@@ -242,13 +253,37 @@ namespace Marketman {
             if (this._defaultBuyer) {
                 return this._defaultBuyer;
             }
-            if (this.getAuthorisedAccounts().buyers.length != 0) {
-                return this.getAuthorisedAccounts().buyers[0];
+            var dataString = PropertiesService.getDocumentProperties().getProperty("MMDefaultBuyer");
+            if (!dataString) {
+                var buyer: Buyer = null;
+                if (this.getAuthorisedAccounts().buyers.length != 0) {
+                    buyer = this.getAuthorisedAccounts().buyers[0];
+                }
+                if (this.getAuthorisedAccounts().chains.length != 0 && this.getAuthorisedAccounts().chains[0].buyers.length != 0) {
+                    buyer = this.getAuthorisedAccounts().chains[0].buyers[0];
+                }
+                this._defaultBuyer = buyer;
+                return buyer;
             }
-            if (this.getAuthorisedAccounts().chains.length != 0 && this.getAuthorisedAccounts().chains[0].buyers.length != 0) {
-                return this.getAuthorisedAccounts().chains[0].buyers[0];
-            }
-            return null;
+            var data = JSON.parse(dataString);
+            Logger.log("Found Default Buyer: " + data);
+            var name: string = data["name"];
+            var guid: string = data["guid"];
+            var buyer = new Marketman.Buyer(name, guid);
+            Logger.log("Retrieved Buyer " + buyer);
+            this._defaultBuyer = buyer;
+            return buyer;
+        }
+
+        setDefaultBuyer(buyer: Buyer) {
+            var data: { [id: string]: any } = {
+                "name": buyer.name,
+                "guid": buyer.guid
+            };
+            var jsonString = JSON.stringify(data);
+            Logger.log("Storing New Buyer");
+            Logger.log(data + " => " + jsonString);
+            PropertiesService.getDocumentProperties().setProperty("MMDefaultBuyer", jsonString);
         }
 
         getInventoryCounts(fromDate: Date, toDate: Date = new Date(), getLineDetails: Boolean = true, buyer: Buyer = this.defaultBuyer()): InventoryCountResponse {
@@ -276,11 +311,11 @@ namespace Marketman {
             };
             Logger.log(queryData);
             var response = this.buyerRequestDictionary(endPoint, queryData);
-            Logger.log(startDate+" => "+startDate.dateValue());
+            Logger.log(startDate + " => " + startDate.dateValue());
             var avtResponse = Marketman.ActualVsTheoritical.fromJSON(response, startDate.dateValue(), endDate.dateValue(), buyer.guid);
             return avtResponse;
         }
-        
+
         getInventoryItems(buyer: Buyer = this.defaultBuyer(), getDeleted: boolean = false, itemIDs: string[] = null): InventoryItemsResponse {
             var endPoint = EndPoint.GetInventoryItems;
             var queryData = {

@@ -1,7 +1,18 @@
-function updateInventoryItemsAndCounts() {
+function mmBuyerApi() {
     var buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
-    getInventory("Inventory Items", buyerApi);
-    getInventoryCounts("Inventory Counts", buyerApi);
+    if (buyerApi.defaultBuyer.name.includes("Paddington")) {
+        return buyerApi;
+    }
+    var buyer  = buyerApi.firstBuyerContaining("Paddington");
+    buyerApi.setDefaultBuyer(buyer);
+    return buyerApi;
+}
+
+
+function updateInventoryItemsAndCounts() {
+    var buyerApi = mmBuyerApi();
+    getInventoryItems("Inventory Items", buyerApi);
+    getInventory("Inventory Counts", buyerApi);
 }
 
 function getInventory(sheetName, buyerApi) {
@@ -11,7 +22,7 @@ function getInventory(sheetName, buyerApi) {
     var toDate = sheet.getRange('E2').getValue();
     var getLineDetails = sheet.getRange('G2').getValue();
     var buyerContains = sheet.getRange('I2').getValue();
-    var buyer  = buyerApi.buyersContaining(buyerContains)[0];
+    var buyer  = buyerApi.firstBuyerContaining(buyerContains);
     // TODO: Type Check
     // TODO: check if buyer exists
 
@@ -31,7 +42,7 @@ function getInventory(sheetName, buyerApi) {
 }
 
 function getInventoryButton() {
-    var buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
+    var buyerApi = mmBuyerApi();
 
     // Get the variables needed
     var sheetName = SpreadsheetApp.getActiveSheet().sheetName;
@@ -45,7 +56,7 @@ function getActualVsTheoritical(sheetName, buyerApi) {
     var toDate = sheet.getRange('F2').getValue();
     var toDateStart = (sheet.getRange('G2').getValue() == "Start");
     var buyerContains = sheet.getRange('I2').getValue();
-    var buyer  = buyerApi.buyersContaining(buyerContains)[0];
+    var buyer  = buyerApi.firstBuyerContaining(buyerContains);
     var fromTime =  Marketman.InventoryTime.EndOfDay;
     if (fromDateStart) {
         fromTime = Marketman.InventoryTime.StartOfDay;
@@ -74,7 +85,7 @@ function getActualVsTheoritical(sheetName, buyerApi) {
 }
 
 function getActualVsTheoriticalButton() {
-    var buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
+    var buyerApi = mmBuyerApi();
 
     // Get the variables needed
     var sheetName = SpreadsheetApp.getActiveSheet().sheetName;
@@ -93,7 +104,7 @@ function getInventoryItems(sheetName, buyerApi) {
         itemIDs = itemIDsString.split(",");
     }
 
-    var buyer  = buyerApi.buyersContaining(buyerContains)[0];
+    var buyer  = buyerApi.firstBuyerContaining(buyerContains);
 
     // TODO: Type Check
     // TODO: check if buyer exists
@@ -113,7 +124,7 @@ function getInventoryItems(sheetName, buyerApi) {
 
 }
 function getInventoryItemsButton() {
-    var buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
+    var buyerApi = mmBuyerApi();
 
     // Get the variables needed
     var sheetName = SpreadsheetApp.getActiveSheet().sheetName;

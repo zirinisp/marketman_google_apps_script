@@ -24,8 +24,12 @@ function getProductId(productName: string, startDate: Date, endDate: Date): stri
     });
     return productId;
 }
-
-function getInventoryCountDates(productName: string): Date[] {
+/**
+ * @param  {string} productName Name of the Product / Item Name
+ * @param  {[[]]} watchForUpdates Cells that when updated the fuctions will recalculate
+ * @returns Date
+ */
+function getInventoryCountDates(productName: string, watchForUpdates: [[]]): Date[] {
     if (productName == null || productName === "") {
         return null;
     }
@@ -48,7 +52,7 @@ function getInventoryCountDates(productName: string): Date[] {
     return countDates;
 }
 
-function getInventoryCountDateBefore(productName: string, beforeDate: Date): Date {
+function getInventoryCountDateBefore(productName: string, beforeDate: Date, watchForUpdates: [[]]): Date {
     if ((productName == null) || (productName === "") || (beforeDate == null)) {
         return null;
     }

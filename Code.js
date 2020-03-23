@@ -1,3 +1,11 @@
+function onOpen() {
+    var ui = SpreadsheetApp.getUi();
+    ui.createMenu('💢 Paz Labs')
+    .addItem('Update Inventory Counts', 'updateInventoryItemsAndCounts')
+    .addSeparator()
+    .addToUi();
+  }
+
 function mmBuyerApi() {
     var buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
     if (buyerApi.defaultBuyer.name.includes("Paddington")) {

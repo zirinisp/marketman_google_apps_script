@@ -16,12 +16,15 @@ namespace Marketman {
             }
 
             stringValue(timezone: string = 'Etc/GMT') {
-                let formatted_date = Utilities.formatDate(this.date, timezone.toString(), 'yyyy/MM/dd')
+                var date = this.date;
                 if (this.time == InventoryTime.StartOfDay) {
-                    formatted_date += " 00:00:00";
+                    date.setHours(0, 0, 0, 0);
+                    //formatted_date += " 00:00:00";
                 } else {
-                    formatted_date += " 23:59:59";
+                    date.setHours(23, 59, 59, 0);
+                    //formatted_date += " 23:59:59";
                 }
+                let formatted_date = Utilities.formatDate(this.date, timezone.toString(), 'yyyy/MM/dd HH:mm:ss')
                 return formatted_date;        
             }
 
@@ -33,7 +36,7 @@ namespace Marketman {
             }
 
             public static fromDate(date: Date) : InventoryDate {
-                if (date.getUTCHours() >= 12) {
+                if (date.getHours() >= 12) {
                     return new InventoryDate(date, InventoryTime.EndOfDay);
                 } else {
                     return new InventoryDate(date, InventoryTime.StartOfDay);

@@ -219,7 +219,7 @@ namespace Marketman {
             }
             if (responseText == null) {
                 responseText = this.buyerRequest(endPoint, query);
-                chunky.put(cacheKey, responseText, 120);
+                chunky.put(cacheKey, responseText, 500);
                 //CacheService.getDocumentCache().put(cacheKey, responseText, 120);
             } else {
                 Logger.log("Using cache "+cacheKey);

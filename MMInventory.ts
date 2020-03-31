@@ -26,7 +26,7 @@ namespace Marketman {
             }
 
             dateValue() {
-                var stringValue = this.stringValue().replace(" ", "T").replace("/", "-").replace("/", "-")+"+00:00";
+                var stringValue = this.stringValue().replace(" ", "T").replace("/", "-").replace("/", "-")+"Z";
                 var date = new Date(Date.parse(stringValue));
                 Logger.log(stringValue+ " => "+date);
                 return date;
@@ -39,6 +39,7 @@ namespace Marketman {
                     return new InventoryDate(date, InventoryTime.StartOfDay);
                 }
             }
+
         }
 
         export class InventoryCountResponse {

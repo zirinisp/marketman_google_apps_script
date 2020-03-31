@@ -62,7 +62,8 @@ namespace Marketman {
 
 
     export function convertStringToDate(mmDateString: string) {
-        var date = new Date(mmDateString);
+        var stringValue = (mmDateString.replace(" ", "T").replace("/", "-").replace("/", "-"))+"Z";
+        var date = new Date(Date.parse(stringValue));
         return date;
     }
 
@@ -167,7 +168,7 @@ namespace Marketman {
         getTokenDetails(): {} {
             var endPoint = EndPoint.GetTokenDetails;
             var queryData = {};
-            var response = this.buyerRequestDictionary(endPoint, queryData);
+            var response = this.buyerRequestDictionary(endPoint, queryData, endPoint, false);
             return response;
         }
 
@@ -182,17 +183,21 @@ namespace Marketman {
 
             var endPointURL = this.buyerURL + endPoint;
 
+            var jsonQuery = JSON.stringify(query);
             // Request Options
             var options: URLFetchRequestOptions = {
                 method: 'post',
                 contentType: 'application/json',
                 headers: { AUTH_TOKEN: this.getToken().token },
-                payload: JSON.stringify(query)
+                payload: jsonQuery
             };
+
+            Logger.log("Sending request "+endPoint+" "+jsonQuery);
 
             // Make a POST request with a JSON payload.
             var response = UrlFetchApp.fetch(endPointURL, options);
             var responseText = response.getContentText();
+            Logger.log('Headers from url fetch: ' + JSON.stringify(response.getHeaders()));
             return responseText;
         }
 
@@ -203,8 +208,22 @@ namespace Marketman {
          * @return {[]} response converted to dictionary.
          
          */
-        buyerRequestDictionary(endPoint: string, query: {}): {} {
-            var responseText = this.buyerRequest(endPoint, query);
+        buyerRequestDictionary(endPoint: string, query: {}, cacheKey: string, useCache: Boolean): {} {
+            var responseText: string = null;
+            var chunky = ChunkyCache(CacheService.getDocumentCache(), 1024*90);
+            if (useCache) {
+                responseText = chunky.get(cacheKey);
+                // replaved with ChunkyCache as data were too large
+                // responseText = CacheService.getDocumentCache().get(cacheKey);
+              
+            }
+            if (responseText == null) {
+                responseText = this.buyerRequest(endPoint, query);
+                chunky.put(cacheKey, responseText, 120);
+                //CacheService.getDocumentCache().put(cacheKey, responseText, 120);
+            } else {
+                Logger.log("Using cache "+cacheKey);
+            }
             // Convert Response to JSon Data
             if (responseText) {
                 var responseDictionary = JSON.parse(responseText);
@@ -217,8 +236,8 @@ namespace Marketman {
             if (this.authorisedAccounts && !(force)) {
                 return this.authorisedAccounts;
             }
-
-            var response = this.buyerRequestDictionary(EndPoint.GetAuthorisedAccounts, {});
+            var endPoint = EndPoint.GetAuthorisedAccounts;
+            var response = this.buyerRequestDictionary(endPoint, {}, endPoint, true);
 
             var authorizedAccounts = Marketman.AuthorisedAccounts.fromJSON(response);
 
@@ -288,19 +307,22 @@ namespace Marketman {
 
         getInventoryCounts(fromDate: Date, toDate: Date = new Date(), getLineDetails: Boolean = true, buyer: Buyer = this.defaultBuyer()): InventoryCountResponse {
             var endPoint = EndPoint.GetInventoryCounts;
+            var fromDateString = convertDateToString(fromDate);
+            var toDateString = convertDateToString(toDate);
             var queryData = {
-                'DateTimeFromUTC': convertDateToString(fromDate),
-                'DateTimeToUTC': convertDateToString(toDate),
+                'DateTimeFromUTC': fromDateString,
+                'DateTimeToUTC': toDateString,
                 'BuyerGUID': buyer.guid,
                 'GetLineDetails': getLineDetails
             };
+            var cacheKey = endPoint+"-"+fromDateString+"-"+toDateString+"-"+buyer.guid+"-"+getLineDetails;
             Logger.log(queryData);
-            var response = this.buyerRequestDictionary(endPoint, queryData);
+            var response = this.buyerRequestDictionary(endPoint, queryData, cacheKey, true);
             var inventoryResponse = Marketman.InventoryCountResponse.fromJSON(response, fromDate, toDate, getLineDetails, buyer.guid);
             return inventoryResponse;
         }
 
-        getActualVsTheoritical(startDate: InventoryDate, endDate: InventoryDate, buyer: Buyer = this.defaultBuyer()): ActualVsTheoritical {
+        getActualVsTheoritical(startDate: InventoryDate, endDate: InventoryDate, buyer: Buyer = this.defaultBuyer(), useCache: Boolean = true): ActualVsTheoritical {
             var endPoint = EndPoint.GetActualVsTheoretical;
             var startDateString = startDate.stringValue();
             var endDateString = endDate.stringValue();
@@ -309,9 +331,10 @@ namespace Marketman {
                 'EndDateUTC': endDateString,
                 'BuyerGUID': buyer.guid
             };
+            var cacheKey = endPoint+"-"+startDateString+"-"+endDateString+"-"+buyer.guid;
             Logger.log(queryData);
-            var response = this.buyerRequestDictionary(endPoint, queryData);
-            Logger.log(startDate + " => " + startDate.dateValue());
+            var response = this.buyerRequestDictionary(endPoint, queryData, cacheKey, useCache);
+            Logger.log(".. "+ startDate + " => " + startDate.dateValue());
             var avtResponse = Marketman.ActualVsTheoritical.fromJSON(response, startDate.dateValue(), endDate.dateValue(), buyer.guid);
             return avtResponse;
         }
@@ -322,11 +345,13 @@ namespace Marketman {
                 'GetDeleted': getDeleted,
                 'BuyerGUID': buyer.guid
             };
+            var cacheKey = endPoint+"-"+getDeleted+"-"+buyer.guid;
             if (itemIDs != null) {
                 queryData['ItemIDs'] = itemIDs;
+                cacheKey += "-"+itemIDs.join(".");
             }
             Logger.log(queryData);
-            var response = this.buyerRequestDictionary(endPoint, queryData);
+            var response = this.buyerRequestDictionary(endPoint, queryData, cacheKey, true);
             var iiResponse = Marketman.InventoryItemsResponse.fromJSON(response, new Date());
             return iiResponse;
         }

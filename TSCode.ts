@@ -73,6 +73,8 @@ function getInventoryCountDateBefore(productName: string, beforeDate: Date, watc
 
 
 function getMovementSingleProduct(itemID: string, inputDates: [Date, Date], headerString: string): any[][] {
+    // To avoid multiple calls at the same time.
+    Utilities.sleep(Math.random() * 5000);
     // To Test it we can run -> return [[productName, dates.toString(), headers.toString()]]
     var buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
     var data = [];

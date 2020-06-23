@@ -32,7 +32,7 @@ namespace Marketman {
                 json.IsSuccess,
                 json.ErrorMessage,
                 json.ErrorCode,
-                AVTItem.fromJSONArray(json.Items, startDate, endDate),
+                AVTItem.fromJSONArray(json.Items, startDate, endDate, json.IsSuccess, json.ErrorMessage),
                 startDate,
                 endDate,
                 buyerGUID
@@ -132,7 +132,8 @@ namespace Marketman {
         differencePercentage: number;
         startDate: Date;
         endDate: Date;
-
+        isSuccess: boolean;
+        errorMessage: string;
 
         constructor(
             id: string,
@@ -157,7 +158,9 @@ namespace Marketman {
             differenceValue: number,
             differencePercentage: number,
             startDate: Date,
-            endDate: Date
+            endDate: Date,
+            isSuccess: boolean,
+            errorMessage: string
         ) {
             this.id = id;
             this.itemID = itemID;
@@ -182,9 +185,11 @@ namespace Marketman {
             this.differencePercentage = differencePercentage;
             this.startDate = startDate;
             this.endDate = endDate;
+            this.isSuccess = isSuccess;
+            this.errorMessage = errorMessage;
         }
 
-        public static fromJSON(json: { [id: string]: any }, startDate: Date, endDate: Date): AVTItem {
+        public static fromJSON(json: { [id: string]: any }, startDate: Date, endDate: Date, isSuccess: boolean, errorMessage: string): AVTItem {
             return new AVTItem(
                 json.ID,
                 json.ItemID,
@@ -208,15 +213,17 @@ namespace Marketman {
                 json.DifferenceValue,
                 json.DifferencePercentage,
                 startDate,
-                endDate
+                endDate,
+                isSuccess,
+                errorMessage
             );
         }
 
 
-        public static fromJSONArray(jsonArray: [], startDate: Date, endDate: Date): AVTItem[] {
+        public static fromJSONArray(jsonArray: [], startDate: Date, endDate: Date, isSuccess: boolean, errorMessage: string): AVTItem[] {
             var items: AVTItem[] = [];
             jsonArray.forEach(json => {
-                items.push(AVTItem.fromJSON(json, startDate, endDate));
+                items.push(AVTItem.fromJSON(json, startDate, endDate, isSuccess, errorMessage));
             });
             return items;
         }

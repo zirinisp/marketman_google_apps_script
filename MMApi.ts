@@ -211,22 +211,23 @@ namespace Marketman {
         buyerRequestDictionary(endPoint: string, query: {}, cacheKey: string, useCache: Boolean): {} {
             var responseText: string = null;
             var chunky = ChunkyCache(CacheService.getDocumentCache(), 1024*90);
+            var freshData = false;
             if (useCache) {
                 responseText = chunky.get(cacheKey);
-                // replaved with ChunkyCache as data were too large
-                // responseText = CacheService.getDocumentCache().get(cacheKey);
-              
             }
             if (responseText == null) {
                 responseText = this.buyerRequest(endPoint, query);
-                chunky.put(cacheKey, responseText, 500);
-                //CacheService.getDocumentCache().put(cacheKey, responseText, 120);
+                freshData = true;
             } else {
                 Logger.log("Using cache "+cacheKey);
             }
             // Convert Response to JSon Data
             if (responseText) {
                 var responseDictionary = JSON.parse(responseText);
+                if (freshData && responseDictionary.isSuccess) {
+                    Logger.log("Saving to cache "+cacheKey);
+                    chunky.put(cacheKey, responseText, 500);
+                }
                 return responseDictionary;
             }
         }

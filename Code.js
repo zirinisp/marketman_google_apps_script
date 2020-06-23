@@ -2,14 +2,15 @@ function onOpen() {
     var ui = SpreadsheetApp.getUi();
     ui.createMenu('💢 Paz Labs')
     .addItem('Update Inventory Counts', 'updateInventoryItemsAndCounts')
-    .addItem('Clear Token', 'clearToken')
+    .addItem('Refresh Token', 'refreshToken')
     .addSeparator()
     .addToUi();
   }
 
-function clearToken() {
+function refreshToken() {
     var buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
     buyerApi.clearToken();
+    buyerApi.getToken(true);
 }
 function mmBuyerApi() {
     var buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);

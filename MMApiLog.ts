@@ -4,16 +4,20 @@ namespace Marketman {
         static sheetName: string = "MarketmanApiLogger";
 
         public static logCall(endpoint: string, parameters: any, response: any) {
-            var ss = SpreadsheetApp.getActiveSpreadsheet();
-            var sheet = ss.getSheetByName(this.sheetName);
-            var newRow = [];
-            // Set the timestamp row;
-            newRow[0] = new Date();
-            newRow[1] = endpoint;
-            newRow[2] = JSON.stringify(parameters);
-            newRow[3] = JSON.stringify(response);
-            sheet.appendRow(newRow);
-            sheet.getRange(sheet.getLastRow() - 1, 1, 1, sheet.getLastColumn()).copyFormatToRange(sheet, 1, sheet.getLastColumn(), sheet.getLastRow(), sheet.getLastRow());
+            try {
+                var ss = SpreadsheetApp.getActiveSpreadsheet();
+                var sheet = ss.getSheetByName(this.sheetName);
+                var newRow = [];
+                // Set the timestamp row;
+                newRow[0] = new Date();
+                newRow[1] = endpoint;
+                newRow[2] = JSON.stringify(parameters);
+                newRow[3] = JSON.stringify(response);
+                sheet.appendRow(newRow);
+                sheet.getRange(sheet.getLastRow() - 1, 1, 1, sheet.getLastColumn()).copyFormatToRange(sheet, 1, sheet.getLastColumn(), sheet.getLastRow(), sheet.getLastRow());
+            } catch (error) {
+                Logger.log(error);
+            }
         }
     }
 }

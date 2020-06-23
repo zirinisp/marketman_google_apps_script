@@ -185,7 +185,6 @@ namespace Marketman {
          
          */
         buyerRequest(endPoint: string, query: {}): string {
-
             var endPointURL = this.buyerURL + endPoint;
 
             var jsonQuery = JSON.stringify(query);
@@ -196,14 +195,18 @@ namespace Marketman {
                 headers: { AUTH_TOKEN: this.getToken().token },
                 payload: jsonQuery
             };
-
-            Logger.log("Sending request "+endPoint+" "+jsonQuery);
-
-            // Make a POST request with a JSON payload.
-            var response = UrlFetchApp.fetch(endPointURL, options);
-            var responseText = response.getContentText();
-            Marketman.SSLogger.logCall(endPoint, options, responseText);
-            return responseText;
+            try {
+                Logger.log("Sending request "+endPoint+" "+jsonQuery);
+    
+                // Make a POST request with a JSON payload.
+                var response = UrlFetchApp.fetch(endPointURL, options);
+                var responseText = response.getContentText();
+                Marketman.SSLogger.logCall(endPoint, options, responseText);
+                return responseText;    
+            } catch (error) {
+                Marketman.SSLogger.logCall(endPoint, options, error);
+                throw error;
+            }
         }
 
         /**

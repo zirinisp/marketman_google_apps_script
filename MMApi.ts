@@ -113,6 +113,10 @@ namespace Marketman {
             PropertiesService.getDocumentProperties().setProperty("MMToken", jsonString);
         }
 
+        clearToken() {
+            PropertiesService.getDocumentProperties().deleteProperty("MMToken");
+        }
+
         // Get a token to make requests. If there is an active token, it is returned and no request is made.
         getToken(force?: boolean): Token {
             if (force != true) {

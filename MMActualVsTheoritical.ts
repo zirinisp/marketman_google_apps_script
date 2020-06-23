@@ -229,7 +229,7 @@ namespace Marketman {
         }
 
         public static emptyItem(name: string, startDate: Date, endDate: Date) {
-            return AVTItem.fromJSON({ "itemName": name }, startDate, endDate);
+            return AVTItem.fromJSON({ "itemName": name }, startDate, endDate, true, "Empty Item");
         }
 
         public toFlatDictionary(): { [id: string]: any } {

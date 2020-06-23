@@ -144,7 +144,7 @@ namespace Marketman {
             // Make a POST request with a JSON payload.
             var response = UrlFetchApp.fetch(endPointURL, params);
             var responseText = response.getContentText();
-
+            Marketman.SSLogger.logCall(EndPoint.GetToken, params, responseText);
             var token = new Token();
             // Convert Response to JSon Data
             if (responseText) {
@@ -169,6 +169,7 @@ namespace Marketman {
             var endPoint = EndPoint.GetTokenDetails;
             var queryData = {};
             var response = this.buyerRequestDictionary(endPoint, queryData, endPoint, false);
+            Marketman.SSLogger.logCall(endPoint, queryData, response);
             return response;
         }
 
@@ -197,7 +198,7 @@ namespace Marketman {
             // Make a POST request with a JSON payload.
             var response = UrlFetchApp.fetch(endPointURL, options);
             var responseText = response.getContentText();
-            Logger.log('Headers from url fetch: ' + JSON.stringify(response.getHeaders()));
+            Marketman.SSLogger.logCall(endPoint, options, responseText);
             return responseText;
         }
 

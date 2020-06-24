@@ -62,7 +62,7 @@ namespace Marketman {
 
 
     export function convertStringToDate(mmDateString: string) {
-        var stringValue = (mmDateString.replace(" ", "T").replace("/", "-").replace("/", "-"))+"Z";
+        var stringValue = (mmDateString.replace(" ", "T").replace("/", "-").replace("/", "-")) + "Z";
         var date = new Date(Date.parse(stringValue));
         return date;
     }
@@ -86,13 +86,13 @@ namespace Marketman {
                 return null;
             }
             var data = JSON.parse(dataString);
-            Logger.log("Found Stored Token: " + data);
+            Logger.log("Found Stored Token: " + dataString);
             var tokenString: string = data["token"];
             var expiryDate = new Date();
             expiryDate.setTime(data["expiryDate"]);
 
             var error: string = data["error"];
-            if (!tokenString || !expiryDate) {
+            if (!tokenString || !expiryDate || tokenString == "") {
                 Logger.log("Token Could not be used " + expiryDate);
                 return null;
             }
@@ -196,13 +196,11 @@ namespace Marketman {
                 payload: jsonQuery
             };
             try {
-                Logger.log("Sending request "+endPoint+" "+jsonQuery);
-    
                 // Make a POST request with a JSON payload.
                 var response = UrlFetchApp.fetch(endPointURL, options);
                 var responseText = response.getContentText();
                 Marketman.SSLogger.logCall(endPoint, options, responseText);
-                return responseText;    
+                return responseText;
             } catch (error) {
                 Marketman.SSLogger.logCall(endPoint, options, error);
                 throw error;
@@ -218,7 +216,12 @@ namespace Marketman {
          */
         buyerRequestDictionary(endPoint: string, query: {}, cacheKey: string, useCache: Boolean): {} {
             var responseText: string = null;
-            var chunky = ChunkyCache(CacheService.getDocumentCache(), 1024*90);
+            // Get a script lock, because we're about to modify a shared resource.
+            var lock = LockService.getScriptLock();
+            // Wait for up to 30 seconds for other processes to finish.
+            lock.waitLock(30000);
+
+            var chunky = ChunkyCache(CacheService.getDocumentCache(), 1024 * 90);
             var freshData = false;
             if (useCache) {
                 responseText = chunky.get(cacheKey);
@@ -227,17 +230,19 @@ namespace Marketman {
                 responseText = this.buyerRequest(endPoint, query);
                 freshData = true;
             } else {
-                Logger.log("Using cache "+cacheKey);
+                Logger.log("Using cache " + cacheKey);
             }
             // Convert Response to JSon Data
             if (responseText) {
                 var responseDictionary = JSON.parse(responseText);
                 if (freshData && responseDictionary.isSuccess) {
-                    Logger.log("Saving to cache "+cacheKey);
+                    Logger.log("Saving to cache " + cacheKey);
                     chunky.put(cacheKey, responseText, 500);
                 }
+                lock.releaseLock();
                 return responseDictionary;
             }
+            lock.releaseLock();
         }
 
         getAuthorisedAccounts(force?: boolean): AuthorisedAccounts {
@@ -324,7 +329,7 @@ namespace Marketman {
                 'BuyerGUID': buyer.guid,
                 'GetLineDetails': getLineDetails
             };
-            var cacheKey = endPoint+"-"+fromDateString+"-"+toDateString+"-"+buyer.guid+"-"+getLineDetails;
+            var cacheKey = endPoint + "-" + fromDateString + "-" + toDateString + "-" + buyer.guid + "-" + getLineDetails;
             Logger.log(queryData);
             var response = this.buyerRequestDictionary(endPoint, queryData, cacheKey, true);
             var inventoryResponse = Marketman.InventoryCountResponse.fromJSON(response, fromDate, toDate, getLineDetails, buyer.guid);
@@ -340,10 +345,10 @@ namespace Marketman {
                 'EndDateUTC': endDateString,
                 'BuyerGUID': buyer.guid
             };
-            var cacheKey = endPoint+"-"+startDateString+"-"+endDateString+"-"+buyer.guid;
+            var cacheKey = endPoint + "-" + startDateString + "-" + endDateString + "-" + buyer.guid;
             Logger.log(queryData);
             var response = this.buyerRequestDictionary(endPoint, queryData, cacheKey, useCache);
-            Logger.log(".. "+ startDate + " => " + startDate.dateValue());
+            Logger.log(".. " + startDate + " => " + startDate.dateValue());
             var avtResponse = Marketman.ActualVsTheoritical.fromJSON(response, startDate.dateValue(), endDate.dateValue(), buyer.guid);
             return avtResponse;
         }
@@ -354,10 +359,10 @@ namespace Marketman {
                 'GetDeleted': getDeleted,
                 'BuyerGUID': buyer.guid
             };
-            var cacheKey = endPoint+"-"+getDeleted+"-"+buyer.guid;
+            var cacheKey = endPoint + "-" + getDeleted + "-" + buyer.guid;
             if (itemIDs != null) {
                 queryData['ItemIDs'] = itemIDs;
-                cacheKey += "-"+itemIDs.join(".");
+                cacheKey += "-" + itemIDs.join(".");
             }
             Logger.log(queryData);
             var response = this.buyerRequestDictionary(endPoint, queryData, cacheKey, true);

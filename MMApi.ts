@@ -97,7 +97,7 @@ namespace Marketman {
                 return null;
             }
             var token = new Token(tokenString, expiryDate, error);
-            Logger.log("Retrieved Token " + token);
+            Logger.log("Retrieved Token " + JSON.stringify(token));
             return token;
         }
 
@@ -235,9 +235,11 @@ namespace Marketman {
             // Convert Response to JSon Data
             if (responseText) {
                 var responseDictionary = JSON.parse(responseText);
-                if (freshData && responseDictionary.isSuccess) {
+                if (freshData && responseDictionary.IsSuccess) {
                     Logger.log("Saving to cache " + cacheKey);
-                    chunky.put(cacheKey, responseText, 500);
+                    chunky.put(cacheKey, responseText, 15*60);
+                } else {
+                    Logger.log("Could not refresh cache. Fresh Data: "+freshData+" success: "+responseDictionary.IsSuccess+" Response Text: "+JSON.stringify(responseDictionary));
                 }
                 lock.releaseLock();
                 return responseDictionary;
@@ -299,11 +301,11 @@ namespace Marketman {
                 return buyer;
             }
             var data = JSON.parse(dataString);
-            Logger.log("Found Default Buyer: " + data);
+            Logger.log("Found Default Buyer: " + JSON.stringify(data));
             var name: string = data["name"];
             var guid: string = data["guid"];
             var buyer = new Marketman.Buyer(name, guid);
-            Logger.log("Retrieved Buyer " + buyer);
+            Logger.log("Retrieved Buyer " + JSON.stringify(buyer));
             this._defaultBuyer = buyer;
             return buyer;
         }

@@ -1,5 +1,5 @@
 class SheetHeadedData {
-    //sheetName: string;
+
     range: SSHeadedRange;
 
     values: [{ [index: string]: any }]

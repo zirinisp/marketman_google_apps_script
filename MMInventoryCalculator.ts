@@ -2,12 +2,20 @@ namespace Marketman {
     export class InventoryCalculator {
         countDates = new Marketman.InventoryCountDates();
         buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
-        spreadsheetName = "Summary 2";
-        
-        countData = new SheetHeadedData(this.spreadsheetName, new SSHeadedRange(0, 0, 0, 0, 3, 6));
+        spreadsheetName = "Summary Data";
 
+        lastItemInventoryKey = "Latest Item Inventory";
+        searchStartKey = "searchStart";
+        searchEndKey = "searchEnd";
+        productIdKey = "productID";
 
-        avtFor(productName: string, dayInterval: number, date: Date = null) : AVTItem {
+        countData = new SheetHeadedData(this.spreadsheetName, new SSHeadedRange(0, 0, 0, 0, 4, 6));
+
+        constructor() {
+            this.countData.getValues();
+        }
+
+        avtIntervalFor(productName: string, dayInterval: number, date: Date = null) : AVTItem {
             var endDate: Date;
             if (date == null) {
                 endDate = this.countDates.lastDateFor(productName);
@@ -20,6 +28,10 @@ namespace Marketman {
             var startDate = new Date();
             startDate.setDate(endDate.getDate() - dayInterval);
             startDate = this.countDates.countDateBefore(productName, startDate);
+            return this.avtFor(productName, startDate, endDate);
+        }
+
+        avtFor(productName: string, startDate: Date, endDate: Date) : AVTItem {
             var mmStartDate = Marketman.InventoryDate.fromDate(startDate);
             var mmEndDate = Marketman.InventoryDate.fromDate(endDate);
 
@@ -27,6 +39,70 @@ namespace Marketman {
             Logger.log(avt);
             var item = avt.itemForName(productName);
             return item;            
+        }
+
+        excludedKey(key: String) {
+            if (key.endsWith(this.searchStartKey) || key.endsWith(this.searchEndKey) || key.endsWith("isSuccess") || key.endsWith("errorMessage")) {
+                return true;
+            }
+            return false;
+        }
+        updateAvtSpreadsheet() {
+            var intervalDays = [6,30,60];
+            this.countData.values.forEach(element => {
+                var productName = element["Product Name"];
+                var endDate = this.countDates.lastDateFor(productName);
+                if (!endDate) {
+                    Object.keys(element).forEach(key => {
+                        if (key[1] == "-") {
+                            element[key] = "";
+                        }
+                    });  
+                    element[this.lastItemInventoryKey] = "";
+                    return;
+                }
+                element[this.lastItemInventoryKey] = endDate;
+                var i = 1;
+                var avts: { [id: string]: any }[] = [];
+                intervalDays.forEach(intervalDay => {
+                    var startDate = new Date();
+                    startDate.setDate(endDate.getDate() - intervalDay);
+                    startDate = this.countDates.countDateBefore(productName, startDate);
+                    element[i+"-"+this.searchStartKey] = startDate;
+                    element[i+"-"+this.searchEndKey] = endDate;
+                    
+                    var avt = this.avtFor(productName, startDate, endDate);
+                    if (avt) {
+                        avts[i-1] = avt.toFlatDictionary();
+                    } else {
+                        avts[i-1] = {};
+                    }
+                    i++;
+                });
+                Object.keys(element).forEach(key => {
+                    if (key[1] != "-" || isNaN(+key[0])) {
+                        return;
+                    }
+                    var i : number = +key[0];
+                    var avt = avts[i];
+                    if (!avt) {
+                        if (!this.excludedKey(key)) {
+                            element[key] = "";
+                        }
+                        return;
+                    }
+                    var avtKey = key.substr(2, key.length -2);
+                    var value = avt[avtKey];
+                    if (value) {
+                        element[key] = value;
+                    } else {
+                        if (!this.excludedKey(key)) {
+                            element[key] = "";
+                        }
+                    }
+                });    
+            });
+            this.countData.writeValues();
         }
 
     }
@@ -71,7 +147,7 @@ namespace Marketman {
 
         lastDateFor(productName: string) : Date {
             var countDates = this.countDatesFor(productName);
-            if (Object.keys(countDates).length < 1) {
+            if (!countDates || countDates.length == 0) {
                 return null;
             }
             var lastDate = countDates[0];
@@ -112,8 +188,13 @@ function testLastCountDates() {
     Logger.log(lastDate);
 }
 
+function testAvtSingleItem() {
+    var calculator = new Marketman.InventoryCalculator();
+    var avt = calculator.avtIntervalFor("PORK NECK SOUVLAKI MARINATED 100gr 6.4gr", 7);
+    Logger.log(avt);
+}
+
 function testAvt() {
     var calculator = new Marketman.InventoryCalculator();
-    var avt = calculator.avtFor("PORK NECK SOUVLAKI MARINATED 100gr 6.4gr", 7);
-    Logger.log(avt);
+    calculator.updateAvtSpreadsheet();
 }

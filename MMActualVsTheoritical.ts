@@ -257,7 +257,9 @@ namespace Marketman {
                 "differenceValue": this.differenceValue,
                 "differencePercentage": this.differencePercentage,
                 "startDate": this.startDate,
-                "endDate": this.endDate
+                "endDate": this.endDate,
+                "isSuccess" : this.isSuccess,
+                "errorMessage" : this.errorMessage
             }
             return data;
         }
@@ -284,7 +286,11 @@ namespace Marketman {
                 "expected",
                 "difference",
                 "differenceValue",
-                "differencePercentage"
+                "differencePercentage",
+                "startDate",
+                "endDate",
+                "isSuccess",
+                "errorMessage"
             ];
             return headers;
         }

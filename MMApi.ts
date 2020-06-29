@@ -219,7 +219,7 @@ namespace Marketman {
             // Get a script lock, because we're about to modify a shared resource.
             var lock = LockService.getScriptLock();
             // Wait for up to 30 seconds for other processes to finish.
-            lock.waitLock(30000);
+            lock.tryLock(30000);
 
             var chunky = ChunkyCache(CacheService.getDocumentCache(), 1024 * 90);
             var freshData = false;
@@ -237,7 +237,7 @@ namespace Marketman {
                 var responseDictionary = JSON.parse(responseText);
                 if (freshData && responseDictionary.IsSuccess) {
                     Logger.log("Saving to cache " + cacheKey);
-                    chunky.put(cacheKey, responseText, 15*60);
+                    chunky.put(cacheKey, responseText, 30*60);
                 } else {
                     Logger.log("Could not refresh cache. Fresh Data: "+freshData+" success: "+responseDictionary.IsSuccess+" Response Text: "+JSON.stringify(responseDictionary));
                 }

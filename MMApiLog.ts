@@ -5,16 +5,25 @@ namespace Marketman {
 
         public static logCall(endpoint: string, parameters: any, response: any) {
             try {
-                var ss = SpreadsheetApp.getActiveSpreadsheet();
-                var sheet = ss.getSheetByName(this.sheetName);
-                var newRow = [];
+                var queryData = {};
                 // Set the timestamp row;
-                newRow[0] = new Date();
-                newRow[1] = endpoint;
-                newRow[2] = JSON.stringify(parameters);
-                newRow[3] = JSON.stringify(response);
-                sheet.appendRow(newRow);
-                sheet.getRange(sheet.getLastRow() - 1, 1, 1, sheet.getLastColumn()).copyFormatToRange(sheet, 1, sheet.getLastColumn(), sheet.getLastRow(), sheet.getLastRow());
+                queryData["Timestamp"] = new Date();
+                queryData["EndPoint"] = endpoint;
+                queryData["Parameters"] = JSON.stringify(parameters);
+                queryData["Response"] = JSON.stringify(response);
+                var json = JSON.stringify(queryData);
+                var endPointURL = LoggingServerURL;
+
+    
+                // Request Options
+                var params: URLFetchRequestOptions = {
+                    method: 'post',
+                    contentType: 'application/json',
+                    payload: json
+                };
+                // Make a POST request with a JSON payload.
+                var requestResponse = UrlFetchApp.fetch(endPointURL, params);
+                
             } catch (error) {
                 Logger.log(error);
             }

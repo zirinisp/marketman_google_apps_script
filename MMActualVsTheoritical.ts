@@ -50,13 +50,16 @@ namespace Marketman {
 
         // Does not work as the name contains the count value also.
         public itemForName(name: string): AVTItem | null {
+            var searchItem: AVTItem = null;
             this.items.forEach(item => {
-                if (item.itemName == name) {
-                    return item;
+                if (item.itemName.substring(0, name.length) === name) {
+                    searchItem = item;
+                    return;
                 }
             });
-            return null;
+            return searchItem;
         }
+
         public itemWithID(id: string): AVTItem {
             var searchItem: AVTItem = null;
             this.items.forEach(item => {

@@ -36,6 +36,9 @@ namespace Marketman {
             }
 
             public static fromDate(date: Date) : InventoryDate {
+                if (!date) {
+                    return null;
+                }
                 if (date.getHours() >= 12) {
                     return new InventoryDate(date, InventoryTime.EndOfDay);
                 } else {

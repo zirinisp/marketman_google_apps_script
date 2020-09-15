@@ -32,11 +32,13 @@ namespace Marketman {
         }
 
         avtFor(productName: string, startDate: Date, endDate: Date) : AVTItem {
+            if (!startDate || !endDate) {
+                return null;
+            }
             var mmStartDate = Marketman.InventoryDate.fromDate(startDate);
             var mmEndDate = Marketman.InventoryDate.fromDate(endDate);
 
             var avt = this.buyerApi.getActualVsTheoritical(mmStartDate, mmEndDate, this.buyerApi.firstBuyerContaining("Paddington"));
-            Logger.log(avt);
             var item = avt.itemForName(productName);
             return item;            
         }
@@ -84,7 +86,7 @@ namespace Marketman {
                         return;
                     }
                     var i : number = +key[0];
-                    var avt = avts[i];
+                    var avt = avts[i-1];
                     if (!avt) {
                         if (!this.excludedKey(key)) {
                             element[key] = "";
@@ -192,6 +194,7 @@ function testAvtSingleItem() {
     var calculator = new Marketman.InventoryCalculator();
     var avt = calculator.avtIntervalFor("PORK NECK SOUVLAKI MARINATED 100gr 6.4gr", 7);
     Logger.log(avt);
+    
 }
 
 function testAvt() {

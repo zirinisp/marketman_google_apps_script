@@ -1,8 +1,8 @@
 function onOpen() {
     var ui = SpreadsheetApp.getUi();
     ui.createMenu('💢 Paz Labs')
-    .addItem('Update Inventory', 'updateInventory')
-    .addItem('Update Summary', 'updateInventoryItemsAndCounts')
+    .addItem('Update Summary', 'updateInventory')
+    .addItem('Update Inventory Counts', 'updateInventoryItemsAndCounts')
     .addItem('Refresh Token', 'refreshToken')
     .addSeparator()
     .addToUi();

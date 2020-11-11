@@ -30,18 +30,30 @@ namespace Marketman {
             var startDate = new Date();
             startDate.setDate(endDate.getDate() - dayInterval);
             startDate = this.countDates.countDateBefore(productName, startDate);
-            return this.avtFor(productName, startDate, endDate);
+            return InventoryCalculator.avtForName(this.buyerApi, productName, startDate, endDate);
         }
 
-        avtFor(productName: string, startDate: Date, endDate: Date) : AVTItem {
+        static avtForName(buyerApi: BuyerApi, productName: string, startDate: Date, endDate: Date) : AVTItem {
             if (!startDate || !endDate) {
                 return null;
             }
             var mmStartDate = Marketman.InventoryDate.fromDate(startDate);
             var mmEndDate = Marketman.InventoryDate.fromDate(endDate);
 
-            var avt = this.buyerApi.getActualVsTheoritical(mmStartDate, mmEndDate, this.buyerApi.firstBuyerContaining("Paddington"));
+            var avt = buyerApi.getActualVsTheoritical(mmStartDate, mmEndDate, buyerApi.firstBuyerContaining("Paddington"));
             var item = avt.itemForName(productName);
+            return item;            
+        }
+
+        static avtForId(buyerApi: BuyerApi, productId: string, startDate: Date, endDate: Date) : AVTItem {
+            if (!startDate || !endDate) {
+                return null;
+            }
+            var mmStartDate = Marketman.InventoryDate.fromDate(startDate);
+            var mmEndDate = Marketman.InventoryDate.fromDate(endDate);
+
+            var avt = buyerApi.getActualVsTheoritical(mmStartDate, mmEndDate, buyerApi.firstBuyerContaining("Paddington"));
+            var item = avt.itemWithID(productId);
             return item;            
         }
 
@@ -106,7 +118,7 @@ namespace Marketman {
                     element[i+"-"+this.searchStartKey] = startDate;
                     element[i+"-"+this.searchEndKey] = endDate;
                     
-                    var avt = this.avtFor(productName, startDate, endDate);
+                    var avt = InventoryCalculator.avtForName(this.buyerApi, productName, startDate, endDate);
                     if (avt) {
                         var flatAvt = avt.toFlatDictionary();
                         //Logger.log(productName+" "+startDate+" - "+endDate);

@@ -52,7 +52,7 @@ namespace Marketman {
             return false;
         }
 
-        resetSpreadsheet() {
+        resetSummaryDataSpreadsheet() {
             // Delete summary data and update product list
             SpreadsheetApp.getActiveSpreadsheet().toast("Updating product names and reseting all values.","Reseting Values");
             // Get Product Names from Summary Spreadsheet and Store them to newValues 
@@ -70,9 +70,11 @@ namespace Marketman {
             this.countData.writeValues();
         }
 
-        updateAvtSpreadsheet() {
-            this.resetSpreadsheet();
-            return;
+        updateSummaryDataSpreadsheet() {
+            // Reset Current Data
+            this.resetSummaryDataSpreadsheet();
+
+            // Update With New Data
             var intervalDays = [6,13,30,60];
             this.countData.values.forEach(element => {
                 var productName = element["Product Name"];
@@ -222,5 +224,5 @@ function testAvtSingleItem() {
 
 function testAvt() {
     var calculator = new Marketman.InventoryCalculator();
-    calculator.updateAvtSpreadsheet();
+    calculator.updateSummaryDataSpreadsheet();
 }

@@ -2,14 +2,16 @@ namespace Marketman {
     export class InventoryCalculator {
         countDates = new Marketman.InventoryCountDates();
         buyerApi = new Marketman.BuyerApi(mmApiKey, mmApiPassword);
-        spreadsheetName = "Summary Data";
+        dataSpreadsheetName = "Summary Data";
+        summarySpreadsheetName = "Summary";
 
         lastItemInventoryKey = "Latest Item Inventory";
         searchStartKey = "searchStart";
         searchEndKey = "searchEnd";
         productIdKey = "productID";
 
-        countData = new SheetHeadedData(this.spreadsheetName, new SSHeadedRange(0, 0, 0, 0, 4, 6));
+        countData = new SheetHeadedData(this.dataSpreadsheetName, new SSHeadedRange(0, 0, 0, 0, 4, 6));
+        summaryData = new SheetHeadedData(this.summarySpreadsheetName, new SSHeadedRange(0, 0, 0, 0, 3, 5));
 
         constructor() {
             this.countData.getValues();
@@ -49,8 +51,29 @@ namespace Marketman {
             }
             return false;
         }
+
+        resetSpreadsheet() {
+            // Delete summary data and update product list
+            SpreadsheetApp.getActiveSpreadsheet().toast("Updating product names and reseting all values.","Reseting Values");
+            // Get Product Names from Summary Spreadsheet and Store them to newValues 
+            var newValues: [{ [index: string]: any }] = [{}];
+            this.summaryData.getValues();
+            this.summaryData.values.forEach(element => {
+                var productName = element["Product Name"];
+                if (productName.length > 0) {
+                    var newValue = { "Product Name" : productName }
+                    newValues.push(newValue);
+                }
+            });
+            // Write New Product Names to Summary Data
+            this.countData.values = newValues;
+            this.countData.writeValues();
+        }
+
         updateAvtSpreadsheet() {
-            var intervalDays = [6,30,60];
+            this.resetSpreadsheet();
+            return;
+            var intervalDays = [6,13,30,60];
             this.countData.values.forEach(element => {
                 var productName = element["Product Name"];
                 var endDate = this.countDates.lastDateFor(productName);

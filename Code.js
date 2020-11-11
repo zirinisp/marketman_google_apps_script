@@ -4,6 +4,7 @@ function onOpen() {
     .addItem('Update Summary', 'updateSummaryData')
     .addItem('Update Inventory Counts', 'updateInventoryItemsAndCounts')
     .addItem('Update Single Product', 'updateSingleProduct')
+    .addItem('Update Actual Vs Theoritical', 'updateActualVsTheoritical')
     .addItem('Refresh Token', 'refreshToken')
     .addSeparator()
     .addToUi();
@@ -155,4 +156,12 @@ function updateSummaryData() {
 function updateSingleProduct() {
     var calculator = new Marketman.SingleProductCalculator();
     calculator.updateSingleProductSpreadsheet();
+}
+
+function updateActualVsTheoritical() {
+    var buyerApi = mmBuyerApi();
+
+    // Get the variables needed
+    var sheetName = "Actual vs Theoritical";
+    getActualVsTheoritical(sheetName, buyerApi);
 }

@@ -175,9 +175,8 @@ class SheetHeadedData {
         this.writeHeaderRange().setValues(headerArray);
     }
     clearValues() {
-        // TODO: Implement
-        //this.writeDataRange().clearContent(); Does not work
-
+        Logger.log(this.writeDataRange());
+        this.writeDataRange().clearContent();
     }
     /**
      * @param  {Boolean=false} writeHeaders - false will use the current headers. true will create new or overwrite them
@@ -201,6 +200,7 @@ class SheetHeadedData {
             data.push(dataArray);
         });
         this.writeDataRange().setValues(data);
+        SpreadsheetApp.flush();
     }
 
     appendValues(newValues: [{ [index: string]: any }]) {

@@ -1,7 +1,7 @@
 function onOpen() {
     var ui = SpreadsheetApp.getUi();
     ui.createMenu('💢 Paz Labs')
-    .addItem('Update Summary', 'updateInventory')
+    .addItem('Update Summary', 'updateSummaryData')
     .addItem('Update Inventory Counts', 'updateInventoryItemsAndCounts')
     .addItem('Refresh Token', 'refreshToken')
     .addSeparator()
@@ -146,7 +146,7 @@ function getInventoryItemsButton() {
     getInventoryItems(sheetName, buyerApi);
 }
 
-function updateInventory() {
+function updateSummaryData() {
     var calculator = new Marketman.InventoryCalculator();
-    calculator.updateAvtSpreadsheet();
+    calculator.updateSummaryDataSpreadsheet();
 }

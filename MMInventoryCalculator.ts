@@ -65,20 +65,26 @@ namespace Marketman {
                     newValues.push(newValue);
                 }
             });
+            this.countData.clearValues();
             // Write New Product Names to Summary Data
             this.countData.values = newValues;
             this.countData.writeValues();
+            this.countData.getValues();
         }
 
         updateSummaryDataSpreadsheet() {
             // Reset Current Data
             this.resetSummaryDataSpreadsheet();
-
+            
             // Update With New Data
+            SpreadsheetApp.getActiveSpreadsheet().toast("Getting New Data","Updating");
             var intervalDays = [6,13,30,60];
             this.countData.values.forEach(element => {
+                // Get Product Name
                 var productName = element["Product Name"];
+                // Get Last Inventory Date
                 var endDate = this.countDates.lastDateFor(productName);
+                //Logger.log("===== Product Name ====="+productName+" End Date "+endDate);
                 if (!endDate) {
                     Object.keys(element).forEach(key => {
                         if (key[1] == "-") {
@@ -88,9 +94,11 @@ namespace Marketman {
                     element[this.lastItemInventoryKey] = "";
                     return;
                 }
+                // Store Last Inventory Date
                 element[this.lastItemInventoryKey] = endDate;
                 var i = 1;
                 var avts: { [id: string]: any }[] = [];
+                // Get avt for each interval
                 intervalDays.forEach(intervalDay => {
                     var startDate = new Date();
                     startDate.setDate(endDate.getDate() - intervalDay);
@@ -100,13 +108,22 @@ namespace Marketman {
                     
                     var avt = this.avtFor(productName, startDate, endDate);
                     if (avt) {
-                        avts[i-1] = avt.toFlatDictionary();
+                        var flatAvt = avt.toFlatDictionary();
+                        //Logger.log(productName+" "+startDate+" - "+endDate);
+                        //Logger.log(flatAvt);
+                        avts[i-1] = flatAvt;
                     } else {
+                        //Logger.log(productName+" "+startDate+" - "+endDate);
+                        //Logger.log("Found Nothing");
                         avts[i-1] = {};
                     }
                     i++;
                 });
+                //Logger.log("-----avts----");
+                //Logger.log(avts);
                 Object.keys(element).forEach(key => {
+                    //Logger.log("Starting with "+key);
+
                     if (key[1] != "-" || isNaN(+key[0])) {
                         return;
                     }
@@ -122,6 +139,7 @@ namespace Marketman {
                     var value = avt[avtKey];
                     if (value) {
                         element[key] = value;
+                        //Logger.log(key+" = "+value)
                     } else {
                         if (!this.excludedKey(key)) {
                             element[key] = "";

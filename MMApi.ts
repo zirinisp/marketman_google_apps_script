@@ -230,16 +230,16 @@ namespace Marketman {
                 responseText = this.buyerRequest(endPoint, query);
                 freshData = true;
             } else {
-                Logger.log("Using cache " + cacheKey);
+                //Logger.log("Using cache " + cacheKey);
             }
             // Convert Response to JSon Data
             if (responseText) {
                 var responseDictionary = JSON.parse(responseText);
                 if (freshData && responseDictionary.IsSuccess) {
-                    Logger.log("Saving to cache " + cacheKey);
+                    //Logger.log("Saving to cache " + cacheKey);
                     chunky.put(cacheKey, responseText, 30*60);
                 } else {
-                    Logger.log("Could not refresh cache. Fresh Data: "+freshData+" success: "+responseDictionary.IsSuccess+" Response Text: "+JSON.stringify(responseDictionary));
+                    //Logger.log("Could not refresh cache. Fresh Data: "+freshData+" success: "+responseDictionary.IsSuccess+" Response Text: "+JSON.stringify(responseDictionary));
                 }
                 lock.releaseLock();
                 return responseDictionary;

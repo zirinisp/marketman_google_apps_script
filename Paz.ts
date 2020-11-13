@@ -163,6 +163,9 @@ class SheetHeadedData {
     writeDataRange(): GoogleAppsScript.Spreadsheet.Range {
         var sheet = this.sheet;
         var range = this.range;
+        if (!this.values ||  !this.headers) {
+            this.getValues();
+        }
         var dataRange = sheet.getRange(range.row + range.firstDataRow - 1, range.column, this.values.length, this.headers.length);
         return dataRange;
     }

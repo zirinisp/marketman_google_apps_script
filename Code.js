@@ -67,26 +67,18 @@ function getInventoryButton() {
 }
 
 function getActualVsTheoritical(sheetName, buyerApi) {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
-    var fromDate = sheet.getRange('C2').getValue();
-    var fromDateStart = (sheet.getRange('D2').getValue() == "Start");
-    var toDate = sheet.getRange('F2').getValue();
-    var toDateStart = (sheet.getRange('G2').getValue() == "Start");
-    var buyerContains = sheet.getRange('I2').getValue();
-    var buyer  = buyerApi.firstBuyerContaining(buyerContains);
-    var fromTime =  Marketman.InventoryTime.EndOfDay;
-    if (fromDateStart) {
-        fromTime = Marketman.InventoryTime.StartOfDay;
-    }
-    var toTime =  Marketman.InventoryTime.EndOfDay;
-    if (toDateStart) {
-        toTime = Marketman.InventoryTime.StartOfDay;
-    }
+    var buyerApi = mmBuyerApi();
 
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+    var startDate = sheet.getRange('C2').getValue();
+    var endDate = sheet.getRange('F2').getValue();
+
+    var mmStartDate = Marketman.InventoryDate.fromDate(startDate);
+    var mmEndDate = Marketman.InventoryDate.fromDate(endDate);
 
     // TODO: Type Check
     // TODO: check if buyer exists
-    var response = buyerApi.getActualVsTheoritical(fromDate, fromTime, toDate, toTime, buyer);
+    var response = buyerApi.getActualVsTheoritical(mmStartDate, mmEndDate);
 
     var values = response.toFlatArray();
     var headers = Marketman.AVTItem.headers();
@@ -95,7 +87,7 @@ function getActualVsTheoritical(sheetName, buyerApi) {
     Logger.log(values);
 
     var sheetData = new SheetHeadedData(sheet.getName(), new SSHeadedRange(0,0,0,0,4,5));
-
+    sheetData.getValues();
     sheetData.values = values;
     sheetData.clearValues();
     sheetData.writeValues(false);

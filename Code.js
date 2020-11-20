@@ -2,7 +2,7 @@ function onOpen() {
     var ui = SpreadsheetApp.getUi();
     ui.createMenu('💢 Paz Labs')
     .addItem('Update Summary', 'updateSummaryData')
-    .addItem('Update Inventory Counts', 'updateInventoryItemsAndCounts')
+    .addItem('Update Inventory Items and Counts', 'updateInventoryItemsAndCounts')
     .addItem('Update Single Product', 'updateSingleProduct')
     .addItem('Update Actual Vs Theoritical', 'updateActualVsTheoritical')
     .addItem('Refresh Token', 'refreshToken')
@@ -34,6 +34,8 @@ function updateInventoryItemsAndCounts() {
 
 function getInventory(sheetName, buyerApi) {
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+    var sheetData = new SheetHeadedData(sheet.getName(), new SSHeadedRange(0,0,0,0,4,5));
+    sheetData.clearValues();
 
     var fromDate = sheet.getRange('C2').getValue();
     var toDate = sheet.getRange('E2').getValue();
@@ -51,10 +53,8 @@ function getInventory(sheetName, buyerApi) {
     Logger.log(headers);
     Logger.log(values);
 
-    var sheetData = new SheetHeadedData(sheet.getName(), new SSHeadedRange(0,0,0,0,4,5));
 
     sheetData.values = values;
-    sheetData.clearValues();
     sheetData.writeValues(false);
 }
 
@@ -70,6 +70,9 @@ function getActualVsTheoritical(sheetName, buyerApi) {
     var buyerApi = mmBuyerApi();
 
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+    var sheetData = new SheetHeadedData(sheet.getName(), new SSHeadedRange(0,0,0,0,4,5));
+    sheetData.clearValues();
+
     var startDate = sheet.getRange('C2').getValue();
     var endDate = sheet.getRange('F2').getValue();
 
@@ -86,10 +89,8 @@ function getActualVsTheoritical(sheetName, buyerApi) {
     Logger.log(headers);
     Logger.log(values);
 
-    var sheetData = new SheetHeadedData(sheet.getName(), new SSHeadedRange(0,0,0,0,4,5));
     sheetData.getValues();
     sheetData.values = values;
-    sheetData.clearValues();
     sheetData.writeValues(false);
 }
 
@@ -103,6 +104,8 @@ function getActualVsTheoriticalButton() {
 
 function getInventoryItems(sheetName, buyerApi) {
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+    var sheetData = new SheetHeadedData(sheet.getName(), new SSHeadedRange(0,0,0,0,4,5));
+    sheetData.clearValues();
 
     var getDeleted = sheet.getRange('C2').getValue();
     var itemIDsString = sheet.getRange('E2').getValue();
@@ -125,10 +128,8 @@ function getInventoryItems(sheetName, buyerApi) {
     Logger.log(headers);
     Logger.log(values);
 
-    var sheetData = new SheetHeadedData(sheet.getName(), new SSHeadedRange(0,0,0,0,4,5));
 
     sheetData.values = values;
-    sheetData.clearValues();
     sheetData.writeValues(false);
 
 }

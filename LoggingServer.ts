@@ -1,4 +1,4 @@
-var marketmanSSId = "1epnaIS1mnh5FMeG7B98dAEsyKr5peDTcGlMY5cfy4kY";
+var marketmanLogginSSId = "1KlI1gcozf4BY_7neV98ma5fHhixSwIudk-v8zocKX1Q";
 var loggingSSName = "MarketmanApiLogger";
 var LoggingServerURL = "https://script.google.com/macros/s/AKfycbwOS4VRxC78OrfgD3uYpBChHcVmgPCrTpN4k8N7XIgmsc9L8ixS/exec";
 import URLFetchRequestOptions = GoogleAppsScript.URL_Fetch.URLFetchRequestOptions;
@@ -6,7 +6,7 @@ import URLFetchRequestOptions = GoogleAppsScript.URL_Fetch.URLFetchRequestOption
 function doPost(request) {
     if (request != null) {
       //try {
-        var ss = SpreadsheetApp.openById(marketmanSSId);
+        var ss = SpreadsheetApp.openById(marketmanLogginSSId);
         var sheet = ss.getSheetByName(loggingSSName);
         var lock = LockService.getScriptLock();
         lock.tryLock(10000);

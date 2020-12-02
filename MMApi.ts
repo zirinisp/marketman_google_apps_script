@@ -350,7 +350,7 @@ namespace Marketman {
             var cacheKey = endPoint + "-" + startDateString + "-" + endDateString + "-" + buyer.guid;
             Logger.log(queryData);
             var response = this.buyerRequestDictionary(endPoint, queryData, cacheKey, useCache);
-            Logger.log(".. " + startDate + " => " + startDate.dateValue());
+            //Logger.log(".. " + startDate + " => " + startDate.dateValue());
             var avtResponse = Marketman.ActualVsTheoritical.fromJSON(response, startDate.dateValue(), endDate.dateValue(), buyer.guid);
             return avtResponse;
         }

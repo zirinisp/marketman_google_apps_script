@@ -28,7 +28,7 @@ namespace Marketman {
                 return null;
             }
             var startDate = new Date();
-            startDate.setDate(endDate.getDate() - dayInterval);
+            startDate = getDaysAgo(endDate, dayInterval);
             startDate = this.countDates.countDateBefore(productName, startDate);
             return InventoryCalculator.avtForName(this.buyerApi, productName, startDate, endDate);
         }
@@ -113,7 +113,7 @@ namespace Marketman {
                 // Get avt for each interval
                 intervalDays.forEach(intervalDay => {
                     var startDate = new Date();
-                    startDate.setDate(endDate.getDate() - intervalDay);
+                    startDate = getDaysAgo(endDate, intervalDay);
                     startDate = this.countDates.countDateBefore(productName, startDate);
                     element[i+"-"+this.searchStartKey] = startDate;
                     element[i+"-"+this.searchEndKey] = endDate;
@@ -233,6 +233,13 @@ namespace Marketman {
     }
 }
 
+function getDaysAgo(date: Date, daysAgo: number) {
+    var newDate = new Date(date);
+    newDate.setDate(date.getDate()-daysAgo);
+    Logger.log(date+" - "+daysAgo+" = "+newDate);
+    return newDate;
+};
+
 function testCountDates() {
     var countDates = new Marketman.InventoryCountDates();
     var productCounts = countDates.productCounts;
@@ -255,4 +262,10 @@ function testAvtSingleItem() {
 function testAvt() {
     var calculator = new Marketman.InventoryCalculator();
     calculator.updateSummaryDataSpreadsheet();
+}
+
+function testDaysAgo() {
+    var date = new Date();
+    var pastDate = getDaysAgo(date, 10);
+    Logger.log(date+" -> "+pastDate);
 }

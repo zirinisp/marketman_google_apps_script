@@ -31,7 +31,7 @@ namespace Marketman {
             dateValue() {
                 var stringValue = this.stringValue().replace(" ", "T").replace("/", "-").replace("/", "-")+"Z";
                 var date = new Date(Date.parse(stringValue));
-                Logger.log(stringValue+ " => "+date);
+                //Logger.log(stringValue+ " => "+date);
                 return date;
             }
 

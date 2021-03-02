@@ -1,10 +1,11 @@
 function onOpen() {
     var ui = SpreadsheetApp.getUi();
     ui.createMenu('💢 Paz Labs')
-    .addItem('Update Summary', 'updateSummaryData')
-    .addItem('Update Inventory Items and Counts', 'updateInventoryItemsAndCounts')
-    .addItem('Update Single Product', 'updateSingleProduct')
-    .addItem('Update Actual Vs Theoritical', 'updateActualVsTheoritical')
+    .addItem('Update Summary', 'updateSummaryDataWeb')
+    .addItem('Update Summary Direct', 'updateSummaryData')
+    .addItem('Update Inventory Items and Counts', 'updateInventoryItemsAndCountsWeb')
+    .addItem('Update Single Product', 'updateSingleProductWeb')
+    .addItem('Update Actual Vs Theoritical', 'updateActualVsTheoriticalWeb')
     .addItem('Refresh Token', 'refreshToken')
     .addSeparator()
     .addToUi();

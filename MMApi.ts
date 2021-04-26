@@ -223,10 +223,15 @@ namespace Marketman {
 
             var chunky = ChunkyCache(CacheService.getDocumentCache(), 1024 * 90);
             var freshData = false;
+            var timestamp;
+            var cacheTimestamp: Date;
             if (useCache) {
                 responseText = chunky.get(cacheKey);
+                cacheTimestamp = new Date(chunky.get(cacheKey+"Timestamp"));
             }
-            if (responseText == null) {
+            var resetTimestamp = getCacheResetDate();
+            if ((responseText == null) || (resetTimestamp > cacheTimestamp)) {
+                timestamp = new Date();
                 responseText = this.buyerRequest(endPoint, query);
                 freshData = true;
             } else {
@@ -238,6 +243,7 @@ namespace Marketman {
                 if (freshData && responseDictionary.IsSuccess) {
                     //Logger.log("Saving to cache " + cacheKey);
                     chunky.put(cacheKey, responseText, 30*60);
+                    chunky.put(cacheKey+"Timestamp", timestamp, 30*60);
                 } else {
                     //Logger.log("Could not refresh cache. Fresh Data: "+freshData+" success: "+responseDictionary.IsSuccess+" Response Text: "+JSON.stringify(responseDictionary));
                 }
